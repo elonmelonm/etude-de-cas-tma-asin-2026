@@ -174,19 +174,20 @@ Le module [`src/rendezVous.ts`](src/rendezVous.ts) est conçu comme un noyau mé
 - **Règle de gestion violée (Section 2)** :
   - *« Les rendez-vous d'un usager sont listés du plus récent au plus ancien, le prochain rendez-vous en tête, par pages de 10. »*
 - **Diagnostic technique (cause probable en production)** :
-  - L'usager `0203040506` possède **13 rendez-vous** en base, dont le RDV `#826` prévu le **`02/12/2026 08:30`** (`confirme`).
-  - Or la page 1 retournée par l'API affiche dans l'ordre :
-    `28/07/2026`, `25/09/2026`, `21/04/2026`, `19/05/2026`, `16/06/2026`, `12/02/2026`, `11/08/2026`, `08/05/2026`, `07/07/2026`, `04/08/2026`.
-  - On observe que les résultats sont triés **par ordre alphabétique décroissant du numéro du jour dans le mois (`JJ`)** : `28 > 25 > 21 > 19 > 16 > 12 > 11 > 08 > 07 > 04` !
-  - Le rendez-vous du **`02/12/2026`** commence par `"02/"` : lors d'un tri alphabétique décroissant sur la chaîne formatée `"JJ/MM/AAAA HH:MM"` (sans priorisation du prochain rendez-vous à venir), `"02/12/2026"` se retrouve **12e sur 13** (relégué en page 2, entre `"03/03/2026"` et `"02/06/2026"`).
+  - L'usager `0203040506` possède **13 rendez-vous** en base (`IDs 1 à 11, 259 et 826`), dont le RDV `#826` prévu le **`02/12/2026 08:30`** (`confirme`).
+  - Or la page 1 retournée par l'API affiche dans l'ordre **9 dates** :
+    `28/07/2026`, `25/09/2026`, `21/04/2026`, `19/05/2026`, `16/06/2026`, `12/02/2026`, `11/08/2026`, `08/05/2026`, `07/07/2026`.
+  - On identifie **deux bugs cumulés** dans cette trace :
+    1. **Tri alphabétique sur la date formatée `JJ/MM/AAAA HH:MM` et absence de mise en tête du prochain RDV** : les résultats sont triés par ordre lexicographique décroissant sur la chaîne `"JJ/MM/AAAA HH:MM"`, c'est-à-dire suivant le numéro du jour dans le mois (`28 > 25 > 21 > 19 > 16 > 12 > 11 > 08 > 07 > 05 > 03 > 02`). Le rendez-vous du **`02/12/2026`** commence par `"02/"` et se retrouve **12e sur 13** (relégué en page 2, entre `"03/03/2026"` et `"02/06/2026"`).
+    2. **Erreur de borne (*off-by-one*) sur la pagination** : bien que la réponse annonce `"parPage": 10` et `"total": 13`, la trace ne renvoie que **9 éléments** sur la page 1 (le 10e élément du tri alphabétique, `05/01/2026 08:30` `#1`, est absent), typique d'un découpage erroné `liste[1:10]` (1-indexé) ou `slice(0, parPage - 1)`.
 - **Correction apportée** :
   - Dans [`listerRendezVousUsager`](src/rendezVous.ts) :
     1. Conversion de chaque `dateHeure` en timestamp numérique réel (compatible ISO `AAAA-MM-JJTHH:MM`, SQL `AAAA-MM-JJ HH:MM:SS` et format français `JJ/MM/AAAA HH:MM`).
     2. Placement en tête du prochain rendez-vous à venir (`statut === 'confirme'` et `timestampMs > maintenant`).
     3. Tri des autres rendez-vous par `timestampMs` décroissant (du plus récent au plus ancien).
-    4. Découpage par pages de `10`.
+    4. Découpage exact par pages de `10` (`debut = (page - 1) * parPage`, `slice(debut, debut + parPage)`).
 - **Test automatisé** :
-  - Rejoue les 13 rendez-vous exacts du NPI `0203040506` issus de `base_rendez_vous.sql` : vérifie que la page 1 contient 10 éléments avec le RDV `#826` (`2026-12-02 08:30:00`) en 1re position (`[826, 756, 703, 527, 469, 434, 384, 300, 267, 238]`) et la page 2 les 3 plus anciens (`[163, 98, 22]`).
+  - Rejoue les 13 rendez-vous exacts du NPI `0203040506` issus de `base_rendez_vous.sql` : vérifie que la page 1 contient exactement 10 éléments avec le RDV `#826` (`2026-12-02 08:30:00`) en 1re position (`[826, 259, 11, 10, 9, 8, 7, 6, 5, 4]`) et la page 2 les 3 plus anciens (`[3, 2, 1]`).
 
 ---
 
@@ -274,11 +275,13 @@ L'audit croisé de [`base_rendez_vous.sql`](base_rendez_vous.sql) et des traces 
 - **Protection dans le module** :
   - Conversion de l'heure en minutes depuis minuit (`heure * 60 + minute`) et contrôle strict `480 <= minutes <= 930` (`08:00` à `15:30` inclus) avec `minute % 30 === 0`. Testé dans `should reject slots at 16:00 and 16:30 found in database audit (Bonus 2: IDs 490, 698, 842)`.
 
-### Bonus 3 — Cumul de plusieurs rendez-vous à venir pour un même usager (51 cas historiques, dont doublons exacts)
+### Bonus 3 — Cumul de plusieurs rendez-vous à venir pour un même usager (51 couples en anomalie / 49 RDV créés en doublon)
 - **Preuve en base (`base_rendez_vous.sql`)** :
-  - **51 couples de rendez-vous** montrent qu'un même NPI a pu réserver un second rendez-vous alors qu'il avait déjà un rendez-vous confirmé à venir :
-    - Exemple 1 (encore actif à la date d'export) : le NPI `0902861159` a réservé le RDV **`#751`** le `09/11/2026` pour le `2026-12-01 09:00:00` (`CNI`, toujours `confirme`), puis a pu réserver le RDV **`#816`** le `17/11/2026` pour le `2026-11-19 11:30:00` (`PASSEPORT`) alors que `#751` était déjà confirmé à venir.
-    - Exemple 2 (doublon à la même seconde) : le NPI `0536455681` possède deux rendez-vous (`#43` `PASSEPORT` et `#99` `PERMIS`) sur le **même créneau** `2026-09-01 09:30:00` !
+  - Sur les 209 paires de rendez-vous partageant un même NPI (`r1.id < r2.id`), **52 paires** ont été réservées de manière chevauchante (`r1.date_heure > r2.cree_le`, c'est-à-dire que le 2e rendez-vous `r2` a été créé avant que la date du 1er rendez-vous `r1` ne soit passée).
+  - En croisant avec `historique_statuts`, **1 seule paire** est légitime (`#28` et `#68` du NPI `0166114635`, car `#28` a été annulé le `2026-08-23 01:26:47` avant la réservation de `#68` le `2026-08-26 18:43:31`).
+  - Les **51 autres couples** (représentant **49 rendez-vous créés en doublon** sur **47 NPI distincts**, dont 2 usagers ayant cumulé 3 rendez-vous simultanés : `0923981337` et `0819331908`) violent la règle d'unicité car `r1` était toujours au statut `'confirme'` à l'instant `r2.cree_le` :
+    - Exemple 1 (impliquant un RDV encore actif à la date d'export) : le NPI `0902861159` a réservé le RDV **`#751`** le `2026-11-11 14:35:14` pour le `2026-12-01 08:00:00` (`PASSEPORT`, toujours `confirme`), puis a pu réserver le RDV **`#816`** le `2026-11-17 19:29:37` pour le `2026-11-20 11:30:00` (`PASSEPORT`) alors que `#751` était déjà confirmé à venir.
+    - Exemple 2 (doublon sur le même créneau horaire) : le NPI `0536455681` possède deux rendez-vous (`#43` `PERMIS` et `#99` `PASSEPORT`) sur le **même créneau** `2026-09-01 09:30:00` !
 - **Cause technique probable** :
   - La vérification d'unicité de rendez-vous à venir comportait une faille (ex. filtre sur une fenêtre de dates restreinte, ou absence de contrainte transactionnelle).
 - **Protection dans le module** :
@@ -302,3 +305,4 @@ L'audit croisé de [`base_rendez_vous.sql`](base_rendez_vous.sql) et des traces 
   - C'est cette transformation prématurée en chaîne `JJ/MM/AAAA HH:MM` avant le tri qui a provoqué le bug `TMA-106` (tri alphabétique sur le jour `JJ`).
 - **Protection dans le module** :
   - Le module conserve et retourne un format ISO canonique (`AAAA-MM-JJTHH:MM`) à la création, tout en étant capable en lecture (`modeStrictIso = false`) d'interpréter aussi bien l'ISO (`2026-12-02T08:30`), le format SQL (`2026-12-02 08:30:00`) que le format français historique (`02/12/2026 08:30`).
+

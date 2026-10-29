@@ -114,3 +114,30 @@ FROM rendez_vous
 WHERE statut = 'confirme'
   AND date_heure <= '2026-11-20 18:00:00'
 ORDER BY date_heure ASC;
+
+-- Bonus D : Couples de rendez-vous chevauchants pour un même NPI où le 1er RDV
+-- était encore au statut 'confirme' au moment où le 2nd RDV a été réservé
+-- Résultat : 51 couples en anomalie (49 seconds rendez-vous sur 47 NPI distincts)
+SELECT
+  r1.id AS rdv1_id,
+  r1.npi,
+  r1.service AS rdv1_service,
+  r1.date_heure AS rdv1_date_heure,
+  r1.cree_le AS rdv1_cree_le,
+  r2.id AS rdv2_id,
+  r2.service AS rdv2_service,
+  r2.date_heure AS rdv2_date_heure,
+  r2.cree_le AS rdv2_cree_le
+FROM rendez_vous r1
+INNER JOIN rendez_vous r2
+  ON r1.npi = r2.npi
+ AND r1.id < r2.id
+WHERE r1.date_heure > r2.cree_le
+  AND NOT EXISTS (
+    SELECT 1
+    FROM historique_statuts h
+    WHERE h.rendez_vous_id = r1.id
+      AND h.nouveau_statut = 'annule'
+      AND h.modifie_le <= r2.cree_le
+  )
+ORDER BY r1.id ASC, r2.id ASC;
