@@ -3,641 +3,748 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Démonstrateur Interactif — TMA DEP/ASIN 2026 (Prise de rendez-vous au guichet)</title>
+  <title>Banc d'essai TMA : Prise de rendez-vous au guichet (DEP/ASIN 2026)</title>
   <style>
     :root {
-      --bg-primary: #0b0f17;
-      --bg-secondary: #111827;
-      --bg-card: #161f30;
-      --bg-elevated: #1e293b;
-      --border: #283548;
-      --text-primary: #f8fafc;
-      --text-secondary: #94a3b8;
-      --text-muted: #64748b;
-      --benin-green: #008751;
-      --benin-yellow: #fcd116;
-      --benin-red: #e8112d;
-      --accent: #10b981;
-      --accent-soft: rgba(16, 185, 129, 0.14);
-      --warning: #f59e0b;
-      --warning-soft: rgba(245, 158, 11, 0.14);
-      --danger: #ef4444;
-      --danger-soft: rgba(239, 68, 68, 0.14);
-      --info: #3b82f6;
-      --info-soft: rgba(59, 130, 246, 0.14);
-      --radius: 10px;
-      --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      --font-mono: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, Menlo, monospace;
+      /* Palette architecturale minérale : ardoise claire & vert civique béninois */
+      --surface-page: #f3f6f8;
+      --surface-panel: #e8eef2;
+      --surface-elevated: #ffffff;
+      --surface-code: #11181c;
+      --ink-primary: #0f171e;
+      --ink-secondary: #3b4a56;
+      --ink-muted: #5c6c79;
+      --ink-on-dark: #e6eef4;
+      --border-hairline: #d3dde4;
+      --border-strong: #b6c5d0;
+
+      /* Accents sémantiques calibrés (contraste WCAG AA >= 4.5:1) */
+      --civic-green: #006b3f;
+      --civic-green-hover: #005431;
+      --civic-green-tint: #e3f3ec;
+      --civic-ochre: #8a4f00;
+      --civic-ochre-tint: #f9eedc;
+      --civic-crimson: #a81c24;
+      --civic-crimson-tint: #fbe8ea;
+      --civic-slate: #184e77;
+      --civic-slate-tint: #e4eff7;
+
+      --shadow-subtle: 0 2px 5px rgba(20, 24, 22, 0.04), 0 1px 2px rgba(20, 24, 22, 0.03);
+      --radius-sm: 4px;
+      --radius-md: 6px;
+
+      --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      --font-mono: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    }
+
+    /* Surfaces navigateur personnalisées (Craft Floor) */
+    ::selection {
+      background-color: var(--civic-green-tint);
+      color: var(--civic-green);
     }
 
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
+      caret-color: var(--civic-green);
+    }
+
+    html {
+      font-size: 16px;
+      color-scheme: light;
     }
 
     body {
-      background-color: var(--bg-primary);
-      color: var(--text-primary);
+      background-color: var(--surface-page);
+      color: var(--ink-primary);
       font-family: var(--font-sans);
       line-height: 1.5;
       min-height: 100vh;
+      font-variant-numeric: tabular-nums;
+      -webkit-font-smoothing: antialiased;
     }
 
-    .benin-bar {
-      height: 4px;
-      background: linear-gradient(90deg, var(--benin-green) 0% 33.3%, var(--benin-yellow) 33.3% 66.6%, var(--benin-red) 66.6% 100%);
+    :focus-visible {
+      outline: 2px solid var(--civic-green);
+      outline-offset: 2px;
     }
 
-    header {
-      background: var(--bg-secondary);
-      border-bottom: 1px solid var(--border);
-      padding: 18px 28px;
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: var(--surface-panel);
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--border-strong);
+      border-radius: 4px;
+    }
+
+    /* Filet tricolore civique 3px en sommet de page */
+    .civic-ribbon {
+      height: 3px;
+      background: linear-gradient(90deg, #008751 0% 33.33%, #fcd116 33.33% 66.66%, #e8112d 66.66% 100%);
+    }
+
+    /* En-tête de poste de travail */
+    header.workbench-header {
+      background-color: var(--surface-elevated);
+      border-bottom: 1px solid var(--border-hairline);
+      padding: 1rem 1.75rem;
       display: flex;
       flex-wrap: wrap;
       align-items: center;
       justify-content: space-between;
-      gap: 16px;
+      gap: 1.25rem;
     }
 
-    .brand {
+    .header-identity {
+      display: flex;
+      align-items: baseline;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .header-identity h1 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: var(--ink-primary);
+    }
+
+    .header-identity p {
+      font-size: 0.875rem;
+      color: var(--ink-secondary);
+      max-width: 68ch;
+    }
+
+    .clock-instrument {
       display: flex;
       align-items: center;
-      gap: 14px;
+      gap: 0.625rem;
+      background-color: var(--surface-panel);
+      border: 1px solid var(--border-hairline);
+      padding: 0.375rem 0.75rem;
+      border-radius: var(--radius-md);
     }
 
-    .brand-badge {
-      background: var(--accent-soft);
-      color: var(--accent);
-      border: 1px solid rgba(16, 185, 129, 0.35);
-      font-weight: 700;
-      font-size: 12px;
-      letter-spacing: 0.06em;
-      padding: 6px 10px;
-      border-radius: 6px;
-      text-transform: uppercase;
-    }
-
-    .brand h1 {
-      font-size: 18px;
-      font-weight: 700;
-      letter-spacing: -0.01em;
-    }
-
-    .brand p {
-      font-size: 13px;
-      color: var(--text-secondary);
-    }
-
-    .clock-box {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      padding: 8px 14px;
-      border-radius: var(--radius);
-    }
-
-    .clock-box label {
-      font-size: 12px;
-      color: var(--text-secondary);
+    .clock-instrument label {
+      font-size: 0.75rem;
       font-weight: 600;
+      color: var(--ink-secondary);
     }
 
-    .clock-box input {
-      background: var(--bg-primary);
-      color: var(--text-primary);
-      border: 1px solid var(--border);
-      padding: 5px 10px;
-      border-radius: 6px;
+    .clock-instrument input {
+      background-color: var(--surface-elevated);
+      color: var(--ink-primary);
+      border: 1px solid var(--border-strong);
+      padding: 0.25rem 0.5rem;
+      border-radius: var(--radius-sm);
       font-family: var(--font-mono);
-      font-size: 13px;
+      font-size: 0.8125rem;
+      width: 11.5rem;
     }
 
-    .btn-reset-clock {
-      background: var(--bg-elevated);
-      color: var(--text-secondary);
-      border: 1px solid var(--border);
-      padding: 5px 10px;
-      border-radius: 6px;
-      font-size: 12px;
-      cursor: pointer;
-    }
-
-    .btn-reset-clock:hover {
-      color: var(--text-primary);
-      border-color: var(--text-secondary);
-    }
-
-    nav.tabs {
-      max-width: 1360px;
-      margin: 20px auto 0;
-      padding: 0 24px;
+    /* Barre de navigation par modes d'inspection */
+    nav.mode-bar {
+      background-color: var(--surface-panel);
+      border-bottom: 1px solid var(--border-hairline);
+      padding: 0 1.75rem;
       display: flex;
-      gap: 8px;
-      border-bottom: 1px solid var(--border);
+      gap: 1.5rem;
+      overflow-x: auto;
     }
 
-    .tab-btn {
+    .mode-tab {
       background: transparent;
-      color: var(--text-secondary);
+      color: var(--ink-secondary);
       border: none;
       border-bottom: 2px solid transparent;
-      padding: 12px 18px;
-      font-size: 14px;
+      padding: 0.75rem 0.25rem;
+      font-size: 0.875rem;
       font-weight: 600;
       cursor: pointer;
-      transition: all 0.15s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      white-space: nowrap;
+      transition: color 160ms ease, border-color 160ms ease;
     }
 
-    .tab-btn:hover {
-      color: var(--text-primary);
+    .mode-tab:hover {
+      color: var(--ink-primary);
     }
 
-    .tab-btn.active {
-      color: var(--accent);
-      border-bottom-color: var(--accent);
+    .mode-tab.active {
+      color: var(--civic-green);
+      border-bottom-color: var(--civic-green);
     }
 
-    main {
-      max-width: 1360px;
+    .mode-tab svg {
+      width: 15px;
+      height: 15px;
+      stroke: currentColor;
+      stroke-width: 1.75;
+      fill: none;
+    }
+
+    /* Conteneur principal */
+    main.workspace {
+      max-width: 1400px;
       margin: 0 auto;
-      padding: 24px;
+      padding: 1.5rem 1.75rem 3rem;
     }
 
-    .tab-panel {
+    .view-pane {
       display: none;
     }
 
-    .tab-panel.active {
+    .view-pane.active {
       display: block;
     }
 
-    .grid-2 {
+    /* Architecture Split-Pane pour l'inspecteur de tickets */
+    .inspector-layout {
       display: grid;
-      grid-template-columns: 380px 1fr;
-      gap: 20px;
+      grid-template-columns: 350px 1fr;
+      gap: 1.5rem;
       align-items: start;
     }
 
-    .sim-grid {
+    .simulator-layout {
       display: grid;
-      grid-template-columns: 410px 1fr;
-      gap: 20px;
+      grid-template-columns: 400px 1fr;
+      gap: 1.5rem;
       align-items: start;
     }
 
-    @media (max-width: 980px) {
-      .grid-2, .sim-grid {
+    @media (max-width: 960px) {
+      .inspector-layout,
+      .simulator-layout {
         grid-template-columns: 1fr;
       }
     }
 
-    .card {
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 20px;
+    .sheet {
+      background-color: var(--surface-elevated);
+      border: 1px solid var(--border-hairline);
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-subtle);
+      padding: 1rem;
     }
 
-    .card-title {
-      font-size: 15px;
-      font-weight: 700;
-      margin-bottom: 14px;
+    .sheet-header {
+      padding: 0.25rem 0.25rem 0.875rem;
+      border-bottom: 1px solid var(--border-hairline);
+      margin-bottom: 0.875rem;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 8px;
+      gap: 0.75rem;
     }
 
-    .ticket-list {
+    .sheet-header h2 {
+      font-size: 0.9375rem;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      color: var(--ink-primary);
+    }
+
+    .sheet-body {
+      padding: 0.25rem;
+    }
+
+    /* Liste de sélection des tickets (Registre vertical sans cartes imbriquées) */
+    .ticket-ledger {
+      list-style: none;
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      gap: 0.25rem;
     }
 
-    .ticket-item {
-      background: var(--bg-secondary);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 12px 14px;
+    .ticket-row {
+      width: 100%;
+      background: transparent;
+      border: 1px solid transparent;
+      border-bottom: 1px solid var(--border-hairline);
+      border-radius: var(--radius-sm);
+      padding: 0.75rem 0.875rem;
       text-align: left;
-      color: var(--text-primary);
       cursor: pointer;
-      transition: all 0.15s ease;
       display: flex;
       flex-direction: column;
-      gap: 4px;
+      gap: 0.25rem;
+      transition: background-color 150ms ease;
     }
 
-    .ticket-item:hover {
-      border-color: var(--text-muted);
-      background: var(--bg-elevated);
+    .ticket-row:last-child {
+      border-bottom: none;
     }
 
-    .ticket-item.active {
-      border-color: var(--accent);
-      background: rgba(16, 185, 129, 0.08);
+    .ticket-row:hover {
+      background-color: var(--surface-panel);
     }
 
-    .ticket-item-header {
+    .ticket-row.active {
+      background-color: var(--civic-green-tint);
+    }
+
+    .ticket-row-top {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 8px;
+      gap: 0.5rem;
     }
 
-    .ticket-code {
+    .ticket-id {
       font-family: var(--font-mono);
+      font-size: 0.8125rem;
       font-weight: 700;
-      font-size: 13px;
+      color: var(--ink-primary);
     }
 
-    .badge {
-      font-size: 11px;
+    .ticket-row.active .ticket-id {
+      color: var(--civic-green);
+    }
+
+    .ticket-summary {
+      font-size: 0.8125rem;
+      color: var(--ink-secondary);
+      line-height: 1.35;
+    }
+
+    /* Pastilles d'état sobres (1px border, teinte harmonisée) */
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.125rem 0.5rem;
+      border-radius: var(--radius-sm);
+      font-size: 0.6875rem;
       font-weight: 700;
-      padding: 2px 8px;
-      border-radius: 999px;
-      text-transform: uppercase;
-      letter-spacing: 0.03em;
+      letter-spacing: 0.02em;
+      border: 1px solid transparent;
     }
 
-    .badge-anomaly {
-      background: var(--danger-soft);
-      color: #f87171;
-      border: 1px solid rgba(239, 68, 68, 0.3);
+    .tag-anomaly {
+      background-color: var(--civic-crimson-tint);
+      color: var(--civic-crimson);
+      border-color: rgba(168, 28, 36, 0.25);
     }
 
-    .badge-compliant {
-      background: var(--info-soft);
-      color: #60a5fa;
-      border: 1px solid rgba(59, 130, 246, 0.3);
+    .tag-compliant {
+      background-color: var(--civic-slate-tint);
+      color: var(--civic-slate);
+      border-color: rgba(29, 79, 122, 0.25);
     }
 
-    .badge-bonus {
-      background: var(--warning-soft);
-      color: #fbbf24;
-      border: 1px solid rgba(245, 158, 11, 0.3);
+    .tag-bonus {
+      background-color: var(--civic-ochre-tint);
+      color: var(--civic-ochre);
+      border-color: rgba(143, 83, 0, 0.25);
     }
 
-    . badge-ok {
-      background: var(--accent-soft);
-      color: var(--accent);
-      border: 1px solid rgba(16, 185, 129, 0.3);
+    .tag-ok {
+      background-color: var(--civic-green-tint);
+      color: var(--civic-green);
+      border-color: rgba(0, 107, 63, 0.25);
     }
 
-    .ticket-desc {
-      font-size: 12px;
-      color: var(--text-secondary);
+    /* Détail d'inspection du ticket */
+    .dossier-title-bar {
+      padding: 0.25rem 0.25rem 0.875rem;
+      border-bottom: 1px solid var(--border-hairline);
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 0.75rem;
     }
 
-    .detail-box {
+    .dossier-title-bar h2 {
+      font-size: 1.125rem;
+      font-weight: 700;
+      letter-spacing: -0.015em;
+    }
+
+    .dossier-sections {
+      padding: 0.25rem;
       display: flex;
       flex-direction: column;
-      gap: 16px;
+      gap: 1.25rem;
     }
 
-    .rule-quote {
-      background: var(--bg-secondary);
-      border-left: 3px solid var(--accent);
-      padding: 12px 16px;
-      border-radius: 0 8px 8px 0;
-      font-size: 13px;
-      color: var(--text-secondary);
-    }
-
-    .rule-quote strong {
-      color: var(--text-primary);
-      display: block;
-      margin-bottom: 4px;
-    }
-
-    .compare-grid {
+    .spec-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 14px;
+      gap: 1rem;
     }
 
-    @media (max-width: 720px) {
-      .compare-grid {
+    @media (max-width: 760px) {
+      .spec-grid {
         grid-template-columns: 1fr;
       }
     }
 
-    .code-panel {
-      background: var(--bg-primary);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 14px;
+    .spec-box {
+      background-color: var(--surface-panel);
+      border: 1px solid var(--border-hairline);
+      border-radius: var(--radius-sm);
+      padding: 0.875rem 1rem;
+    }
+
+    .spec-box h3 {
+      font-size: 0.8125rem;
+      font-weight: 700;
+      color: var(--ink-primary);
+      margin-bottom: 0.375rem;
+    }
+
+    .spec-box p {
+      font-size: 0.8125rem;
+      color: var(--ink-secondary);
+      max-width: 68ch;
+      line-height: 1.5;
+    }
+
+    .trace-banner {
+      background-color: var(--surface-panel);
+      border: 1px solid var(--border-hairline);
+      border-radius: var(--radius-sm);
+      padding: 0.625rem 0.875rem;
       font-family: var(--font-mono);
-      font-size: 12px;
+      font-size: 0.75rem;
+      color: var(--ink-secondary);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .trace-banner strong {
+      color: var(--ink-primary);
+    }
+
+    .diff-columns {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+
+    @media (max-width: 760px) {
+      .diff-columns {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .terminal-box {
+      background-color: var(--surface-code);
+      color: var(--ink-on-dark);
+      border: 1px solid #2b332e;
+      border-radius: var(--radius-sm);
+      padding: 0.75rem;
+    }
+
+    .terminal-header {
+      background-color: #1f2622;
+      border-bottom: 1px solid #2e3832;
+      border-radius: var(--radius-sm);
+      padding: 0.5rem 0.75rem;
+      margin-bottom: 0.5rem;
+      font-size: 0.75rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      color: #b7c4bc;
+    }
+
+    .terminal-body {
+      padding: 0.5rem 0.625rem;
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      line-height: 1.55;
       overflow-x: auto;
       white-space: pre-wrap;
     }
 
-    .code-panel.buggy {
-      border-color: rgba(239, 68, 68, 0.4);
+    /* Formulaires et contrôles d'opération */
+    .field {
+      margin-bottom: 0.875rem;
     }
 
-    .code-panel.fixed {
-      border-color: rgba(16, 185, 129, 0.4);
-    }
-
-    .panel-label {
-      font-size: 11px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      margin-bottom: 8px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-
-    .form-group {
-      margin-bottom: 14px;
-    }
-
-    .form-group label {
+    .field label {
       display: block;
-      font-size: 12px;
+      font-size: 0.75rem;
       font-weight: 600;
-      color: var(--text-secondary);
-      margin-bottom: 6px;
+      color: var(--ink-secondary);
+      margin-bottom: 0.375rem;
     }
 
-    .form-control {
+    .input-ctrl {
       width: 100%;
-      background: var(--bg-primary);
-      color: var(--text-primary);
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      padding: 9px 12px;
-      font-size: 13px;
+      background-color: var(--surface-elevated);
+      color: var(--ink-primary);
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-sm);
+      padding: 0.5rem 0.625rem;
+      font-size: 0.8125rem;
       font-family: var(--font-sans);
+      transition: border-color 150ms ease;
     }
 
-    .form-control.mono {
+    .input-ctrl:hover {
+      border-color: var(--ink-secondary);
+    }
+
+    .input-ctrl.mono {
       font-family: var(--font-mono);
     }
 
-    .btn {
-      background: var(--accent);
-      color: #042f2e;
-      font-weight: 700;
-      border: none;
-      padding: 10px 16px;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 13px;
-      transition: opacity 0.15s;
-    }
-
-    .btn:hover {
-      opacity: 0.92;
-    }
-
-    .btn-sm {
-      padding: 5px 10px;
-      font-size: 11px;
+    .btn-primary {
+      background-color: var(--civic-green);
+      color: #ffffff;
+      border: 1px solid var(--civic-green);
+      border-radius: var(--radius-sm);
+      padding: 0.5625rem 1rem;
+      font-size: 0.8125rem;
       font-weight: 600;
-      border-radius: 5px;
       cursor: pointer;
-      border: 1px solid var(--border);
-      background: var(--bg-elevated);
-      color: var(--text-primary);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      transition: background-color 150ms ease;
     }
 
-    .btn-sm:hover {
-      border-color: var(--text-secondary);
+    .btn-primary:hover {
+      background-color: var(--civic-green-hover);
     }
 
-    .btn-sm.danger {
-      background: var(--danger-soft);
-      color: #f87171;
-      border-color: rgba(239, 68, 68, 0.35);
+    .btn-action {
+      background-color: var(--surface-elevated);
+      color: var(--ink-primary);
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-sm);
+      padding: 0.25rem 0.5rem;
+      font-size: 0.75rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background-color 150ms ease, border-color 150ms ease;
     }
 
-    .btn-sm.success {
-      background: var(--accent-soft);
-      color: #34d399;
-      border-color: rgba(16, 185, 129, 0.35);
+    .btn-action:hover {
+      background-color: var(--surface-panel);
+      border-color: var(--ink-secondary);
     }
 
-    .btn-sm.warn {
-      background: var(--warning-soft);
-      color: #fbbf24;
-      border-color: rgba(245, 158, 11, 0.35);
+    .btn-action.act-cancel {
+      color: var(--civic-crimson);
+      border-color: rgba(168, 28, 36, 0.35);
+      background-color: var(--civic-crimson-tint);
     }
 
-    .quick-presets {
+    .btn-action.act-honore {
+      color: var(--civic-green);
+      border-color: rgba(0, 107, 63, 0.35);
+      background-color: var(--civic-green-tint);
+    }
+
+    .btn-action.act-absent {
+      color: var(--civic-ochre);
+      border-color: rgba(143, 83, 0, 0.35);
+      background-color: var(--civic-ochre-tint);
+    }
+
+    .preset-strip {
       display: flex;
       flex-wrap: wrap;
-      gap: 6px;
-      margin-bottom: 14px;
+      gap: 0.375rem;
+      margin-bottom: 1rem;
     }
 
-    table.data-table {
+    /* Tableaux de registre haute densité (Operate Mode) */
+    table.ledger-table {
       width: 100%;
       border-collapse: collapse;
-      font-size: 13px;
+      font-size: 0.8125rem;
+      font-variant-numeric: tabular-nums;
     }
 
-    table.data-table th,
-    table.data-table td {
-      padding: 9px 10px;
-      border-bottom: 1px solid var(--border);
+    table.ledger-table th,
+    table.ledger-table td {
+      padding: 0.5625rem 0.75rem;
+      border-bottom: 1px solid var(--border-hairline);
       text-align: left;
+      vertical-align: middle;
     }
 
-    table.data-table th {
-      color: var(--text-secondary);
-      font-size: 11px;
-      text-transform: uppercase;
-      letter-spacing: 0.04em;
-      background: var(--bg-secondary);
+    table.ledger-table th {
+      background-color: var(--surface-panel);
+      color: var(--ink-secondary);
+      font-size: 0.75rem;
+      font-weight: 600;
     }
 
-    .status-pill {
-      display: inline-block;
-      padding: 2px 8px;
-      border-radius: 999px;
-      font-size: 11px;
-      font-weight: 700;
+    table.ledger-table tbody tr:hover {
+      background-color: rgba(242, 239, 232, 0.55);
+    }
+
+    .mono-cell {
       font-family: var(--font-mono);
+      font-size: 0.75rem;
     }
 
-    .status-confirme {
-      background: var(--info-soft);
-      color: #60a5fa;
+    /* Bandeau de synthèse tabulaire pour l'audit SQL (sans Hero-Metric cards) */
+    .summary-strip {
+      background-color: var(--surface-elevated);
+      border: 1px solid var(--border-hairline);
+      border-radius: var(--radius-md);
+      padding: 0.875rem 1rem;
+      margin-bottom: 1.5rem;
+      overflow-x: auto;
     }
 
-    .status-honore {
-      background: var(--accent-soft);
-      color: #34d399;
-    }
-
-    .status-absent {
-      background: var(--warning-soft);
-      color: #fbbf24;
-    }
-
-    .status-annule {
-      background: var(--danger-soft);
-      color: #f87171;
-    }
-
-    .sql-grid {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 20px;
-    }
-
-    .kpi-row {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
-      gap: 14px;
-      margin-bottom: 20px;
-    }
-
-    .kpi-card {
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 16px;
-    }
-
-    .kpi-value {
-      font-size: 26px;
-      font-weight: 800;
-      font-family: var(--font-mono);
-      color: var(--accent);
-    }
-
-    .kpi-label {
-      font-size: 12px;
-      color: var(--text-secondary);
-      margin-top: 4px;
+    .audit-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
     }
   </style>
 </head>
 <body>
-  <div class="benin-bar"></div>
-  <header>
-    <div class="brand">
-      <span class="brand-badge">DEP / ASIN 2026</span>
-      <div>
-        <h1>Prise de rendez-vous au guichet — Démonstrateur TMA</h1>
-        <p>Noyau métier pur (<code>src/rendezVous.ts</code>) • 7 Tickets TMA • Impact SQL • 5 Bonus</p>
-      </div>
+  <div class="civic-ribbon"></div>
+
+  <header class="workbench-header">
+    <div class="header-identity">
+      <h1>Prise de rendez-vous au guichet : Banc d'essai TMA (DEP/ASIN 2026)</h1>
+      <p>Vérification interactive du module métier pur <code>src/rendezVous.ts</code>, des 7 tickets du support et de l'audit SQL.</p>
     </div>
-    <div class="clock-box">
-      <label for="globalClock">Horloge Bénin (GMT+1) :</label>
-      <input type="text" id="globalClock" value="2026-11-20T18:00" />
-      <button class="btn-reset-clock" id="resetClockBtn" title="Revenir à la date de l'export SQL">Réinitialiser (20/11 18:00)</button>
+
+    <div class="clock-instrument">
+      <label for="globalClock">Horloge Bénin (GMT+1)</label>
+      <input type="text" id="globalClock" value="2026-11-20T18:00" aria-label="Horloge courante du Bénin" />
+      <button type="button" class="btn-action" id="resetClockBtn">20/11 18:00</button>
     </div>
   </header>
 
-  <nav class="tabs">
-    <button class="tab-btn active" data-tab="tab-tickets">1. Rejouer les 7 Tickets &amp; 5 Bonus</button>
-    <button class="tab-btn" data-tab="tab-sim">2. Simulateur Interactif (Usager &amp; Agent)</button>
-    <button class="tab-btn" data-tab="tab-sql">3. Résultats SQL d'Impact (base_rendez_vous.sql)</button>
+  <nav class="mode-bar" aria-label="Modes d'inspection">
+    <button type="button" class="mode-tab active" data-tab="tab-tickets">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+      <span>Inspection des 7 Tickets &amp; 4 Bonus</span>
+    </button>
+    <button type="button" class="mode-tab" data-tab="tab-sim">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      <span>Simulateur Guichet &amp; Usager</span>
+    </button>
+    <button type="button" class="mode-tab" data-tab="tab-sql">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
+      <span>Registre d'Impact SQL (base_rendez_vous.sql)</span>
+    </button>
   </nav>
 
-  <main>
-    <!-- TAB 1 : REJOUER LES TICKETS & BONUS -->
-    <section id="tab-tickets" class="tab-panel active">
-      <div class="grid-2">
-        <div class="card">
-          <div class="card-title">
-            <span>Sélectionner un scénario</span>
-            <span style="font-size:12px;color:var(--text-secondary)">12 cas</span>
+  <main class="workspace">
+    <!-- VUE 1 : INSPECTION DES TICKETS -->
+    <section id="tab-tickets" class="view-pane active">
+      <div class="inspector-layout">
+        <div class="sheet">
+          <div class="sheet-header">
+            <h2>Dossiers TMA &amp; Anomalies Bonus</h2>
+            <span class="mono-cell" style="color:var(--ink-muted);">11 scénarios</span>
           </div>
-          <div class="ticket-list" id="scenarioList"></div>
+          <div class="ticket-ledger" id="scenarioList" role="listbox" aria-label="Liste des tickets TMA"></div>
         </div>
 
-        <div class="card detail-box" id="scenarioDetail"></div>
+        <div class="sheet" id="scenarioDetail" aria-live="polite"></div>
       </div>
     </section>
 
-    <!-- TAB 2 : SIMULATEUR INTERACTIF -->
-    <section id="tab-sim" class="tab-panel">
-      <div class="sim-grid">
-        <div style="display:flex;flex-direction:column;gap:18px;">
-          <div class="card">
-            <div class="card-title">
-              <span>Prendre un rendez-vous (<code>prendreRendezVous</code>)</span>
+    <!-- VUE 2 : SIMULATEUR INTERACTIF -->
+    <section id="tab-sim" class="view-pane">
+      <div class="simulator-layout">
+        <div style="display:flex;flex-direction:column;gap:1.25rem;">
+          <div class="sheet">
+            <div class="sheet-header">
+              <h2>Contrôler une prise de rendez-vous (<code>prendreRendezVous</code>)</h2>
             </div>
-            <div class="quick-presets">
-              <button class="btn-sm" onclick="fillPreset('valid')">Créneau valide (Mer 25/11 09:00)</button>
-              <button class="btn-sm danger" onclick="fillPreset('saturday')">Samedi (TMA-101)</button>
-              <button class="btn-sm danger" onclick="fillPreset('full')">Créneau plein 24/11 14:00 (TMA-102)</button>
-              <button class="btn-sm danger" onclick="fillPreset('badnpi')">NPI lettre (TMA-103)</button>
-              <button class="btn-sm danger" onclick="fillPreset('afterhours')">16:00 hors grille (Bonus 2)</button>
-              <button class="btn-sm warn" onclick="fillPreset('already')">2e RDV à venir (TMA-107)</button>
+            <div class="sheet-body">
+              <div class="preset-strip" aria-label="Cas de test rapides">
+                <button type="button" class="btn-action" onclick="fillPreset('valid')">Créneau valide (Mer 25/11 09:00)</button>
+                <button type="button" class="btn-action act-cancel" onclick="fillPreset('saturday')">Samedi (TMA-101)</button>
+                <button type="button" class="btn-action act-cancel" onclick="fillPreset('full')">Créneau complet (TMA-102)</button>
+                <button type="button" class="btn-action act-cancel" onclick="fillPreset('badnpi')">NPI lettre (TMA-103)</button>
+                <button type="button" class="btn-action act-cancel" onclick="fillPreset('afterhours')">Créneau 16:00 (Bonus 2)</button>
+                <button type="button" class="btn-action act-absent" onclick="fillPreset('already')">RDV déjà à venir (TMA-107)</button>
+              </div>
+
+              <form id="bookingForm" onsubmit="handleBooking(event)">
+                <div class="field">
+                  <label for="inputNpi">NPI de l'usager (exactement 10 chiffres, zéros en tête significatifs)</label>
+                  <input type="text" id="inputNpi" class="input-ctrl mono" value="0614253647" required />
+                </div>
+                <div class="field">
+                  <label for="inputService">Service demandé</label>
+                  <select id="inputService" class="input-ctrl">
+                    <option value="PASSEPORT">PASSEPORT : Retrait de passeport</option>
+                    <option value="CNI">CNI : Carte nationale d'identité</option>
+                    <option value="PERMIS">PERMIS : Permis de conduire</option>
+                    <option value="VISA">VISA : Service non reconnu (test HTTP 400)</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label for="inputDateHeure">Date et heure du créneau (<code>AAAA-MM-JJTHH:MM</code>)</label>
+                  <input type="text" id="inputDateHeure" class="input-ctrl mono" value="2026-11-25T09:00" required />
+                </div>
+                <button type="submit" class="btn-primary" style="width:100%;">
+                  <span>Valider la demande de rendez-vous</span>
+                </button>
+              </form>
             </div>
-            <form id="bookingForm" onsubmit="handleBooking(event)">
-              <div class="form-group">
-                <label>NPI de l'usager (exactement 10 chiffres, zéros significatifs)</label>
-                <input type="text" id="inputNpi" class="form-control mono" value="0614253647" />
-              </div>
-              <div class="form-group">
-                <label>Service demandé</label>
-                <select id="inputService" class="form-control">
-                  <option value="PASSEPORT">PASSEPORT</option>
-                  <option value="CNI">CNI</option>
-                  <option value="PERMIS">PERMIS</option>
-                  <option value="VISA">VISA (Service inconnu -> test 400)</option>
-                </select>
-              </div>
-              <div class="form-group">
-                <label>Date et heure souhaitées (format <code>AAAA-MM-JJTHH:MM</code>)</label>
-                <input type="text" id="inputDateHeure" class="form-control mono" value="2026-11-25T09:00" />
-              </div>
-              <button type="submit" class="btn" style="width:100%;">Exécuter prendreRendezVous()</button>
-            </form>
           </div>
 
-          <div class="card">
-            <div class="card-title">
-              <span>Dernière réponse du module métier</span>
-              <span id="httpStatusBadge" class="badge badge-compliant">Prêt</span>
+          <div class="terminal-box">
+            <div class="terminal-header">
+              <span>Sortie directe du module <code>src/rendezVous.ts</code></span>
+              <span id="httpStatusBadge" class="tag tag-compliant">En attente</span>
             </div>
-            <div class="code-panel" id="liveConsole">Cliquez sur un bouton d'action pour observer le retour exact du module src/rendezVous.ts.</div>
+            <div class="terminal-body" id="liveConsole">Sélectionnez un cas rapide ou soumettez le formulaire pour inspecter la réponse JSON et le code HTTP.</div>
           </div>
         </div>
 
-        <div class="card">
-          <div class="card-title">
-            <span>Liste paginée &amp; Actions Guichet (<code>listerRendezVousUsager</code>)</span>
-            <div style="display:flex;gap:8px;align-items:center;">
-              <select id="filterNpiSelect" class="form-control mono" style="width:auto;padding:5px 10px;font-size:12px;" onchange="changeFilterNpi()">
-                <option value="ALL">Tous les RDV de démonstration</option>
-                <option value="0203040506" selected>NPI 0203040506 (13 RDV — TMA-106)</option>
-                <option value="0102030405">NPI 0102030405 (RDV #800 — TMA-107)</option>
-                <option value="0614253647">NPI 0614253647 (RDV #742 — TMA-101)</option>
-                <option value="0339205992">NPI 0339205992 (RDV #709 — TMA-104)</option>
-                <option value="0330677555">NPI 0330677555 (RDV #292 — TMA-105)</option>
+        <div class="sheet">
+          <div class="sheet-header">
+            <h2>Registre des rendez-vous &amp; Pagination (<code>listerRendezVousUsager</code>)</h2>
+            <div style="display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap;">
+              <label for="filterNpiSelect" style="font-size:0.75rem;color:var(--ink-secondary);font-weight:600;">Usager :</label>
+              <select id="filterNpiSelect" class="input-ctrl mono" style="width:auto;padding:0.25rem 0.5rem;" onchange="changeFilterNpi()">
+                <option value="0203040506" selected>0203040506 (13 RDV : TMA-106)</option>
+                <option value="0102030405">0102030405 (RDV #800 : TMA-107)</option>
+                <option value="0614253647">0614253647 (RDV #742 : TMA-101)</option>
+                <option value="0339205992">0339205992 (RDV #709 : TMA-104)</option>
+                <option value="0330677555">0330677555 (RDV #292 : TMA-105)</option>
+                <option value="ALL">Tous les dossiers chargés</option>
               </select>
-              <button class="btn-sm" onclick="prevPage()">◀ Page préc.</button>
-              <span id="pageIndicator" style="font-size:12px;font-family:var(--font-mono);">Page 1/2</span>
-              <button class="btn-sm" onclick="nextPage()">Page suiv. ▶</button>
+              <button type="button" class="btn-action" onclick="prevPage()">Précédent</button>
+              <span id="pageIndicator" class="mono-cell" style="color:var(--ink-secondary);">Page 1/2</span>
+              <button type="button" class="btn-action" onclick="nextPage()">Suivant</button>
             </div>
           </div>
-          <p style="font-size:12px;color:var(--text-secondary);margin-bottom:12px;">
-            Règle appliquée : <strong>prochain rendez-vous confirmé à venir en tête</strong>, puis tri chronologique décroissant par pages de <strong>10</strong>. Testez aussi <code>annulerRendezVous()</code> (usager) et <code>changerStatutRendezVous()</code> (agent).
-          </p>
+
           <div style="overflow-x:auto;">
-            <table class="data-table">
+            <table class="ledger-table">
               <thead>
                 <tr>
                   <th>ID</th>
                   <th>NPI</th>
                   <th>Service</th>
-                  <th>Créneau (dateHeure)</th>
+                  <th>Créneau prévu</th>
                   <th>Statut</th>
-                  <th>Actions (Usager / Agent)</th>
+                  <th>Opérations de contrôle</th>
                 </tr>
               </thead>
               <tbody id="rdvTableBody"></tbody>
@@ -647,83 +754,92 @@
       </div>
     </section>
 
-    <!-- TAB 3 : RESULTATS SQL D'IMPACT -->
-    <section id="tab-sql" class="tab-panel">
-      <div class="kpi-row">
-        <div class="kpi-card">
-          <div class="kpi-value">889</div>
-          <div class="kpi-label">Rendez-vous audités dans <code>base_rendez_vous.sql</code></div>
-        </div>
-        <div class="kpi-card">
-          <div class="kpi-value" style="color:#fbbf24;">5</div>
-          <div class="kpi-label">RDV confirmés à venir un samedi (usagers à prévenir)</div>
-        </div>
-        <div class="kpi-card">
-          <div class="kpi-value" style="color:#f87171;">3</div>
-          <div class="kpi-label">Créneaux en surnombre (&gt; 3 RDV non annulés)</div>
-        </div>
-        <div class="kpi-card">
-          <div class="kpi-value" style="color:#60a5fa;">4</div>
-          <div class="kpi-label">RDV passés de <code>annule</code> à un autre statut</div>
-        </div>
-        <div class="kpi-card">
-          <div class="kpi-value" style="color:#a78bfa;">51</div>
-          <div class="kpi-label">Couples de RDV chevauchants détectés (Bonus 3)</div>
-        </div>
+    <!-- VUE 3 : REGISTRE D'IMPACT SQL -->
+    <section id="tab-sql" class="view-pane">
+      <div class="summary-strip">
+        <table class="ledger-table">
+          <thead>
+            <tr>
+              <th>Périmètre d'audit (<code>base_rendez_vous.sql</code> au 20/11/2026 18:00)</th>
+              <th>Volume total</th>
+              <th>RDV samedi à venir (Req. 1)</th>
+              <th>Créneaux &gt; 3 usagers (Req. 2)</th>
+              <th>Transitions annulé → autre (Req. 3)</th>
+              <th>Couples chevauchants (Bonus 3)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Tables <code>rendez_vous</code> &amp; <code>historique_statuts</code></td>
+              <td class="mono-cell"><strong>889 RDV / 757 hist.</strong></td>
+              <td class="mono-cell"><span class="tag tag-anomaly">5 RDV confirmés</span></td>
+              <td class="mono-cell"><span class="tag tag-bonus">3 créneaux (4 RDV chacun)</span></td>
+              <td class="mono-cell"><span class="tag tag-compliant">4 RDV réouverts</span></td>
+              <td class="mono-cell"><span class="tag tag-bonus">51 couples (49 doublons)</span></td>
+            </tr>
+          </tbody>
+        </table>
       </div>
 
-      <div class="sql-grid">
-        <div class="card">
-          <div class="card-title">
-            <span>Requête 1 — Rendez-vous confirmés à venir pris un samedi ou un dimanche (5 usagers à prévenir)</span>
-            <span class="badge badge-anomaly">Priorité : RDV #680 dès demain 21/11 à 08:30</span>
+      <div class="audit-stack">
+        <div class="sheet">
+          <div class="sheet-header">
+            <h2>1. Rendez-vous confirmés à venir pris un samedi ou un dimanche (usagers à contacter)</h2>
+            <span class="tag tag-anomaly">5 dossiers : dont #680 dès le 21/11 à 08:30</span>
           </div>
-          <table class="data-table">
-            <thead>
-              <tr><th>ID</th><th>NPI</th><th>Service</th><th>Date et heure</th><th>Jour</th><th>Statut</th><th>Créé le</th></tr>
-            </thead>
-            <tbody>
-              <tr><td><strong>680</strong></td><td><code>0669147625</code></td><td>PASSEPORT</td><td><code>2026-11-21 08:30:00</code></td><td>Samedi</td><td><span class="status-pill status-confirme">confirme</span></td><td>2026-11-02 18:45:57</td></tr>
-              <tr><td><strong>730</strong></td><td><code>0679617916</code></td><td>CNI</td><td><code>2026-11-28 09:00:00</code></td><td>Samedi</td><td><span class="status-pill status-confirme">confirme</span></td><td>2026-11-08 13:45:37</td></tr>
-              <tr><td><strong>834</strong></td><td><code>0610588823</code></td><td>CNI</td><td><code>2026-12-05 10:00:00</code></td><td>Samedi</td><td><span class="status-pill status-confirme">confirme</span></td><td>2026-11-19 07:16:21</td></tr>
-              <tr><td><strong>857</strong></td><td><code>0671987446</code></td><td>PERMIS</td><td><code>2026-12-05 10:00:00</code></td><td>Samedi</td><td><span class="status-pill status-confirme">confirme</span></td><td>2026-11-20 12:38:16</td></tr>
-              <tr><td><strong>874</strong></td><td><code>0648953073</code></td><td>PASSEPORT</td><td><code>2026-12-12 11:00:00</code></td><td>Samedi</td><td><span class="status-pill status-confirme">confirme</span></td><td>2026-11-20 16:39:37</td></tr>
-            </tbody>
-          </table>
+          <div style="overflow-x:auto;">
+            <table class="ledger-table">
+              <thead>
+                <tr><th>ID</th><th>NPI</th><th>Service</th><th>Date et heure du créneau</th><th>Jour</th><th>Statut</th><th>Date de réservation</th></tr>
+              </thead>
+              <tbody>
+                <tr><td class="mono-cell"><strong>#680</strong></td><td class="mono-cell">0669147625</td><td>PASSEPORT</td><td class="mono-cell">2026-11-21 08:30:00</td><td>Samedi</td><td><span class="tag tag-compliant">confirme</span></td><td class="mono-cell">2026-11-02 18:45:57</td></tr>
+                <tr><td class="mono-cell"><strong>#730</strong></td><td class="mono-cell">0679617916</td><td>CNI</td><td class="mono-cell">2026-11-28 09:00:00</td><td>Samedi</td><td><span class="tag tag-compliant">confirme</span></td><td class="mono-cell">2026-11-08 13:45:37</td></tr>
+                <tr><td class="mono-cell"><strong>#834</strong></td><td class="mono-cell">0610588823</td><td>CNI</td><td class="mono-cell">2026-12-05 10:00:00</td><td>Samedi</td><td><span class="tag tag-compliant">confirme</span></td><td class="mono-cell">2026-11-19 07:16:21</td></tr>
+                <tr><td class="mono-cell"><strong>#857</strong></td><td class="mono-cell">0671987446</td><td>PERMIS</td><td class="mono-cell">2026-12-05 10:00:00</td><td>Samedi</td><td><span class="tag tag-compliant">confirme</span></td><td class="mono-cell">2026-11-20 12:38:16</td></tr>
+                <tr><td class="mono-cell"><strong>#874</strong></td><td class="mono-cell">0648953073</td><td>PASSEPORT</td><td class="mono-cell">2026-12-12 11:00:00</td><td>Samedi</td><td><span class="tag tag-compliant">confirme</span></td><td class="mono-cell">2026-11-20 16:39:37</td></tr>
+              </tbody>
+            </table>
+          </div>
         </div>
 
-        <div class="card">
-          <div class="card-title">
-            <span>Requête 2 — Créneaux qui comptent plus de 3 rendez-vous non annulés (3 créneaux)</span>
-            <span class="badge badge-bonus">Créneau 2026-11-24 14:00:00 à venir !</span>
+        <div class="sheet">
+          <div class="sheet-header">
+            <h2>2. Créneaux qui comptent plus de 3 rendez-vous non annulés</h2>
+            <span class="tag tag-bonus">3 créneaux : dont le mardi 24/11/2026 à 14:00 à venir</span>
           </div>
-          <table class="data-table">
-            <thead>
-              <tr><th>Créneau</th><th>Nb RDV non annulés</th><th>IDs et NPIs concernés</th><th>État</th></tr>
-            </thead>
-            <tbody>
-              <tr><td><code>2026-10-22 10:30:00</code></td><td><strong>4</strong></td><td><code>#502</code> (0645563824), <code>#511</code> (0651727951), <code>#517</code> (0636435449), <code>#519</code> (0661073846)</td><td>Passé (tous <code>honore</code>)</td></tr>
-              <tr><td><code>2026-11-10 09:00:00</code></td><td><strong>4</strong></td><td><code>#632</code> (0638958971), <code>#644</code> (0671968463), <code>#681</code> (0609394161), <code>#697</code> (0620214467)</td><td>Passé (cf. <strong>TMA-102</strong>)</td></tr>
-              <tr><td><code>2026-11-24 14:00:00</code></td><td><strong>4</strong></td><td><code>#728</code> (0672061877), <code>#750</code> (0650272558), <code>#763</code> (0695270551), <code>#783</code> (0646734692)</td><td><strong>À venir (tous <code>confirme</code>)</strong></td></tr>
-            </tbody>
-          </table>
+          <div style="overflow-x:auto;">
+            <table class="ledger-table">
+              <thead>
+                <tr><th>Créneau horaire</th><th>Usagers actifs</th><th>Dossiers et NPIs inscrits</th><th>Situation opérationnelle</th></tr>
+              </thead>
+              <tbody>
+                <tr><td class="mono-cell">2026-10-22 10:30:00</td><td class="mono-cell"><strong>4 / 3</strong></td><td class="mono-cell">#502 (0645563824), #511 (0651727951), #517 (0636435449), #519 (0661073846)</td><td>Passé (tous <code>honore</code>)</td></tr>
+                <tr><td class="mono-cell">2026-11-10 09:00:00</td><td class="mono-cell"><strong>4 / 3</strong></td><td class="mono-cell">#632 (0638958971), #644 (0671968463), #681 (0609394161), #697 (0620214467)</td><td>Passé (cf. ticket <strong>TMA-102</strong>)</td></tr>
+                <tr><td class="mono-cell">2026-11-24 14:00:00</td><td class="mono-cell"><strong>4 / 3</strong></td><td class="mono-cell">#728 (0672061877), #750 (0650272558), #763 (0695270551), #783 (0646734692)</td><td><span class="tag tag-anomaly">À venir (4 confirmés pour 3 guichets)</span></td></tr>
+              </tbody>
+            </table>
+          </div>
         </div>
 
-        <div class="card">
-          <div class="card-title">
-            <span>Requête 3 — Rendez-vous passés du statut « annulé » à un autre statut (4 rendez-vous)</span>
+        <div class="sheet">
+          <div class="sheet-header">
+            <h2>3. Rendez-vous passés du statut « annulé » à un autre statut</h2>
+            <span class="tag tag-compliant">4 dossiers identifiés via historique_statuts</span>
           </div>
-          <table class="data-table">
-            <thead>
-              <tr><th>ID RDV</th><th>NPI</th><th>Service</th><th>Créneau</th><th>Transition</th><th>Modifié le</th><th>Agent</th></tr>
-            </thead>
-            <tbody>
-              <tr><td><strong>208</strong></td><td><code>0384914669</code></td><td>PASSEPORT</td><td><code>2026-10-07 10:00:00</code></td><td><code>annule → honore</code></td><td>2026-10-07 10:20:00</td><td><code>AG-01</code></td></tr>
-              <tr><td><strong>231</strong></td><td><code>0370202195</code></td><td>PASSEPORT</td><td><code>2026-10-15 10:00:00</code></td><td><code>annule → honore</code></td><td>2026-10-15 10:26:00</td><td><code>AG-02</code></td></tr>
-              <tr><td><strong>262</strong></td><td><code>0317656053</code></td><td>PERMIS</td><td><code>2026-10-29 10:00:00</code></td><td><code>annule → absent</code></td><td>2026-10-29 10:21:00</td><td><code>AG-03</code></td></tr>
-              <tr><td><strong>292</strong></td><td><code>0330677555</code></td><td>PASSEPORT</td><td><code>2026-11-12 10:00:00</code></td><td><code>annule → honore</code></td><td>2026-11-12 10:13:00</td><td><code>AG-04</code> (cf. <strong>TMA-105</strong>)</td></tr>
-            </tbody>
-          </table>
+          <div style="overflow-x:auto;">
+            <table class="ledger-table">
+              <thead>
+                <tr><th>ID RDV</th><th>NPI</th><th>Service</th><th>Créneau du RDV</th><th>Ancien statut</th><th>Nouveau statut</th><th>Horodatage modification</th><th>Opérateur</th></tr>
+              </thead>
+              <tbody>
+                <tr><td class="mono-cell"><strong>#208</strong></td><td class="mono-cell">0384914669</td><td>PASSEPORT</td><td class="mono-cell">2026-10-07 10:00:00</td><td><span class="tag tag-anomaly">annule</span></td><td><span class="tag tag-ok">honore</span></td><td class="mono-cell">2026-10-07 10:20:00</td><td class="mono-cell">AG-01</td></tr>
+                <tr><td class="mono-cell"><strong>#231</strong></td><td class="mono-cell">0370202195</td><td>PASSEPORT</td><td class="mono-cell">2026-10-15 10:00:00</td><td><span class="tag tag-anomaly">annule</span></td><td><span class="tag tag-ok">honore</span></td><td class="mono-cell">2026-10-15 10:26:00</td><td class="mono-cell">AG-02</td></tr>
+                <tr><td class="mono-cell"><strong>#262</strong></td><td class="mono-cell">0317656053</td><td>PERMIS</td><td class="mono-cell">2026-10-29 10:00:00</td><td><span class="tag tag-anomaly">annule</span></td><td><span class="tag tag-bonus">absent</span></td><td class="mono-cell">2026-10-29 10:21:00</td><td class="mono-cell">AG-03</td></tr>
+                <tr><td class="mono-cell"><strong>#292</strong></td><td class="mono-cell">0330677555</td><td>PASSEPORT</td><td class="mono-cell">2026-11-12 10:00:00</td><td><span class="tag tag-anomaly">annule</span></td><td><span class="tag tag-ok">honore</span></td><td class="mono-cell">2026-11-12 10:13:00</td><td class="mono-cell">AG-04 (TMA-105)</td></tr>
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
     </section>
@@ -736,7 +852,6 @@
     const SERVICES_VALIDES = ['PASSEPORT', 'CNI', 'PERMIS'];
     const STATUTS_CLOTURE_AGENT = ['honore', 'absent'];
     const CAPACITE_MAX_CRENEAU = 3;
-    const TAILLE_PAGE_DEFAUT = 10;
     const DELAI_MIN_ANNULATION_HEURES = 24;
     const HEURE_OUVERTURE_MINUTES = 8 * 60;
     const HEURE_DERNIER_CRENEAU_MINUTES = 15 * 60 + 30;
@@ -917,7 +1032,6 @@
     // DONNÉES DE RÉFÉRENCE EXTRAITES DE base_rendez_vous.sql
     // =========================================================================
     const baseRendezVousDemo = [
-      // Les 13 RDV exacts de l'usager 0203040506 (TMA-106)
       { id: 1, npi: '0203040506', service: 'PASSEPORT', dateHeure: '2026-01-05 08:30:00', statut: 'honore' },
       { id: 2, npi: '0203040506', service: 'CNI', dateHeure: '2026-02-12 10:00:00', statut: 'honore' },
       { id: 3, npi: '0203040506', service: 'PERMIS', dateHeure: '2026-03-03 14:30:00', statut: 'absent' },
@@ -931,31 +1045,23 @@
       { id: 11, npi: '0203040506', service: 'CNI', dateHeure: '2026-08-11 14:00:00', statut: 'honore' },
       { id: 259, npi: '0203040506', service: 'PERMIS', dateHeure: '2026-09-25 11:00:00', statut: 'honore' },
       { id: 826, npi: '0203040506', service: 'PASSEPORT', dateHeure: '2026-12-02 08:30:00', statut: 'confirme' },
-      // TMA-101 & Bonus 4
       { id: 742, npi: '0614253647', service: 'PASSEPORT', dateHeure: '2026-11-14 10:00:00', statut: 'confirme' },
-      // TMA-104
       { id: 709, npi: '0339205992', service: 'PERMIS', dateHeure: '2026-11-19 10:00:00', statut: 'confirme' },
-      // TMA-105
       { id: 292, npi: '0330677555', service: 'PASSEPORT', dateHeure: '2026-11-12 10:00:00', statut: 'annule' },
-      // TMA-107
       { id: 800, npi: '0102030405', service: 'PASSEPORT', dateHeure: '2026-11-26 10:00:00', statut: 'confirme' },
-      // Créneau plein à venir du 24/11/2026 14:00
       { id: 728, npi: '0672061877', service: 'PERMIS', dateHeure: '2026-11-24 14:00:00', statut: 'confirme' },
       { id: 750, npi: '0650272558', service: 'PASSEPORT', dateHeure: '2026-11-24 14:00:00', statut: 'confirme' },
       { id: 763, npi: '0695270551', service: 'PASSEPORT', dateHeure: '2026-11-24 14:00:00', statut: 'confirme' },
     ];
 
-    // =========================================================================
-    // SCÉNARIOS DES 7 TICKETS TMA + 5 BONUS
-    // =========================================================================
     const scenarios = [
       {
         code: 'TMA-101',
         type: 'anomaly',
         badge: 'Anomalie',
         title: 'Rendez-vous confirmé un samedi (14/11/2026)',
-        rule: '« Le centre reçoit du lundi au vendredi, par créneaux de 30 minutes. » → 409 Le centre est fermé le week-end.',
-        cause: 'En base, les 8 RDV de week-end tombent tous un samedi (0 le dimanche). Le code de production a vérifié jour IN (6, 7) (convention ISO 1..7) sur une fonction renvoyant 0=Lundi..5=Samedi, 6=Dimanche (ex. weekday() en Python), bloquant le dimanche (6) mais laissant passer le samedi (5).',
+        rule: '« Le centre reçoit du lundi au vendredi, par créneaux de 30 minutes. » : Code HTTP 409 : Le centre est fermé le week-end.',
+        cause: 'En base, les 8 RDV de week-end tombent tous un samedi (0 le dimanche). Le code de production a testé jour IN (6, 7) (convention ISO 1..7) sur une fonction renvoyant 0=Lundi..5=Samedi, 6=Dimanche (ex. weekday() en Python), bloquant le dimanche (6) mais laissant passer le samedi (5).',
         endpoint: 'POST /api/rendez-vous (maintenant = 2026-11-09T23:59)',
         buggyOutput: { status: 201, body: { id: 742, npi: '0614253647', service: 'PASSEPORT', dateHeure: '14/11/2026 10:00', statut: 'confirme' } },
         run: () => prendreRendezVous({ npi: '0614253647', service: 'PASSEPORT', dateHeure: '2026-11-14T10:00' }, [], '2026-11-09T23:59'),
@@ -965,7 +1071,7 @@
         type: 'anomaly',
         badge: 'Anomalie',
         title: '4 usagers acceptés sur le créneau du 10/11/2026 à 09:00',
-        rule: '« Un créneau accueille au plus 3 usagers. Un rendez-vous annulé libère sa place. » → 409 Ce créneau est complet.',
+        rule: '« Un créneau accueille au plus 3 usagers. Un rendez-vous annulé libère sa place. » : Code HTTP 409 : Ce créneau est complet.',
         cause: 'Les 3 créneaux en surnombre de la base (22/10 10:30, 10/11 09:00, 24/11 14:00) comptent tous exactement 4 RDV (jamais 5) : le code testait nbInscrits > 3 au lieu de nbInscrits >= 3 avant insertion (ou filtrait par service).',
         endpoint: 'POST /api/rendez-vous (avec RDV #632, #644, #681 déjà confirmés sur 2026-11-10 09:00)',
         buggyOutput: { status: 201, body: { id: 697, npi: '0620214467', service: 'CNI', dateHeure: '10/11/2026 09:00', statut: 'confirme' } },
@@ -996,7 +1102,7 @@
         badge: 'Anomalie',
         title: 'Annulation refusée 40 h avant le rendez-vous (RDV #709)',
         rule: '« L\'usager peut annuler son rendez-vous jusqu\'à 24 heures avant l\'heure prévue. »',
-        cause: 'Le 17/11 à 18:00, le RDV #709 du 19/11 à 10:00 est à 40 h d\'écart (1 jour + 16 h). Le code a utilisé (date_rdv - maintenant).seconds / 3600 (qui vaut 16 h < 24 h en ignorant .days !) ou comparé uniquement les heures du jour (10 - 18 = -8 < 24).',
+        cause: 'Le 17/11 à 18:00, le RDV #709 du 19/11 à 10:00 est à 40 h d\'écart (1 jour + 16 h). Le code a utilisé (date_rdv - maintenant).seconds / 3600 (qui vaut 16 h < 24 h en ignorant .days) ou comparé uniquement les heures du jour (10 - 18 = -8 < 24).',
         endpoint: 'POST /api/rendez-vous/709/annulation (maintenant = 2026-11-17T18:00)',
         buggyOutput: { status: 409, body: { erreur: 'Annulation impossible moins de 24 h avant le rendez-vous.' } },
         run: () => annulerRendezVous({ id: 709, npi: '0339205992', service: 'PERMIS', dateHeure: '2026-11-19 10:00:00', statut: 'confirme' }, '2026-11-17T18:00'),
@@ -1006,7 +1112,7 @@
         type: 'anomaly',
         badge: 'Anomalie',
         title: 'Un rendez-vous annulé (#292) passe au statut "honore"',
-        rule: '« Un rendez-vous confirmé devient honoré, absent ou annulé. Ces trois statuts sont définitifs. » → 409 Ce rendez-vous est déjà clôturé.',
+        rule: '« Un rendez-vous confirmé devient honoré, absent ou annulé. Ces trois statuts sont définitifs. » : Code HTTP 409 : Ce rendez-vous est déjà clôturé.',
         cause: 'L\'endpoint PATCH /api/rendez-vous/:id/statut ne vérifiait pas que le statut actuel était "confirme" avant d\'appliquer "honore" ou "absent" (4 cas en base : #208, #231, #262, #292).',
         endpoint: 'PATCH /api/rendez-vous/292/statut {"statut":"honore"}',
         buggyOutput: { status: 200, body: { id: 292, npi: '0330677555', service: 'PASSEPORT', statut: 'honore' } },
@@ -1018,7 +1124,7 @@
         badge: 'Anomalie',
         title: 'RDV du 2 décembre (#826) absent de la 1re page de "Mes rendez-vous"',
         rule: '« Les rendez-vous d\'un usager sont listés du plus récent au plus ancien, le prochain rendez-vous en tête, par pages de 10. »',
-        cause: '1) Tri alphabétique décroissant sur la chaîne formatée "JJ/MM/AAAA HH:MM" ("28/07" > "25/09" > ... > "02/12/2026" relégué 12e/13 en page 2) sans mettre le prochain RDV en tête. 2) Erreur off-by-one ne renvoyant que 9 dates sur la page 1.',
+        cause: '1) Tri alphabétique décroissant sur la chaîne formatée "JJ/MM/AAAA HH:MM" ("28/07" > "25/09" > ... > "02/12/2026" relégué 12e/13 en page 2) sans mettre le prochain RDV en tête. 2) Erreur de borne ne renvoyant que 9 dates sur la page 1.',
         endpoint: 'GET /api/usagers/0203040506/rendez-vous?page=1',
         buggyOutput: {
           page: 1, parPage: 10, total: 13, nbRenvoyes: 9,
@@ -1038,10 +1144,10 @@
       {
         code: 'TMA-107',
         type: 'compliant',
-        badge: 'Conforme (Pas un bug)',
+        badge: 'Conforme',
         title: 'Refus d\'un RDV PERMIS alors qu\'un RDV PASSEPORT (#800) est déjà à venir',
-        rule: '« Un usager ne peut avoir qu\'un seul rendez-vous à venir, tous services confondus. » → 409 Vous avez déjà un rendez-vous à venir.',
-        cause: 'Comportement 100 % conforme aux spécifications : l\'usager 0102030405 possède déjà le RDV #800 (PASSEPORT) prévu le 26/11/2026 à 10:00.',
+        rule: '« Un usager ne peut avoir qu\'un seul rendez-vous à venir, tous services confondus. » : Code HTTP 409 : Vous avez déjà un rendez-vous à venir.',
+        cause: 'Comportement conforme aux spécifications : l\'usager 0102030405 possède déjà le RDV #800 (PASSEPORT) prévu le 26/11/2026 à 10:00.',
         endpoint: 'POST /api/rendez-vous {"npi":"0102030405","service":"PERMIS","dateHeure":"2026-11-27T09:00"}',
         buggyOutput: { status: 409, body: { erreur: 'Vous avez déjà un rendez-vous à venir.' } },
         run: () => prendreRendezVous(
@@ -1066,8 +1172,8 @@
         type: 'bonus',
         badge: 'Bonus 2',
         title: 'Créneaux à 16:00 et 16:30 après la fermeture (IDs #490, #698 et #842 à venir)',
-        rule: '« Le premier créneau commence à 8 h 00, le dernier à 15 h 30. » → 409 Créneau invalide : de 08:00 à 15:30, toutes les 30 minutes.',
-        cause: 'En base : #490 (16:00), #698 (16:30) et #842 (2026-12-08 16:00:00, confirmé à venir !). Le code testait 8 <= heure <= 16 au lieu de 08:00 <= heureMinute <= 15:30.',
+        rule: '« Le premier créneau commence à 8 h 00, le dernier à 15 h 30. » : Code HTTP 409 : Créneau invalide : de 08:00 à 15:30, toutes les 30 minutes.',
+        cause: 'En base : #490 (16:00), #698 (16:30) et #842 (2026-12-08 16:00:00, confirmé à venir). Le code testait 8 <= heure <= 16 au lieu de 08:00 <= heureMinute <= 15:30.',
         endpoint: 'POST /api/rendez-vous {"npi":"0387129160","service":"PASSEPORT","dateHeure":"2026-12-08T16:00"}',
         buggyOutput: { status: 201, body: { id: 842, npi: '0387129160', service: 'PASSEPORT', dateHeure: '2026-12-08 16:00:00', statut: 'confirme' } },
         run: () => prendreRendezVous({ npi: '0387129160', service: 'PASSEPORT', dateHeure: '2026-12-08T16:00' }, [], '2026-11-19T12:29'),
@@ -1107,60 +1213,68 @@
     let activeScenarioIndex = 0;
     let currentPage = 1;
 
+    const getTagClass = (type) => {
+      if (type === 'anomaly') return 'tag-anomaly';
+      if (type === 'compliant') return 'tag-compliant';
+      return 'tag-bonus';
+    };
+
     const renderScenarioList = () => {
       const container = document.getElementById('scenarioList');
-      container.innerHTML = scenarios.map((s, idx) => {
-        const badgeClass = s.type === 'anomaly' ? 'badge-anomaly' : s.type === 'compliant' ? 'badge-compliant' : 'badge-bonus';
-        return `
-          <button class="ticket-item ${idx === activeScenarioIndex ? 'active' : ''}" onclick="selectScenario(${idx})">
-            <div class="ticket-item-header">
-              <span class="ticket-code">${s.code}</span>
-              <span class="badge ${badgeClass}">${s.badge}</span>
-            </div>
-            <div class="ticket-desc">${s.title}</div>
-          </button>
-        `;
-      }).join('');
+      container.innerHTML = scenarios.map((s, idx) => `
+        <button type="button" role="option" aria-selected="${idx === activeScenarioIndex}" class="ticket-row ${idx === activeScenarioIndex ? 'active' : ''}" onclick="selectScenario(${idx})">
+          <div class="ticket-row-top">
+            <span class="ticket-id">${s.code}</span>
+            <span class="tag ${getTagClass(s.type)}">${s.badge}</span>
+          </div>
+          <div class="ticket-summary">${s.title}</div>
+        </button>
+      `).join('');
     };
 
     const renderScenarioDetail = () => {
       const s = scenarios[activeScenarioIndex];
       const result = s.run();
-      const badgeClass = s.type === 'anomaly' ? 'badge-anomaly' : s.type === 'compliant' ? 'badge-compliant' : 'badge-bonus';
 
       document.getElementById('scenarioDetail').innerHTML = `
-        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
-          <h2 style="font-size:18px;">${s.code} — ${s.title}</h2>
-          <span class="badge ${badgeClass}">${s.badge}</span>
+        <div class="dossier-title-bar">
+          <h2>${s.code} : ${s.title}</h2>
+          <span class="tag ${getTagClass(s.type)}">${s.badge}</span>
         </div>
 
-        <div class="rule-quote">
-          <strong>Règle de gestion de référence (Section 2)</strong>
-          ${s.rule}
-        </div>
-
-        <div class="rule-quote" style="border-left-color:var(--warning);">
-          <strong>Diagnostic technique (Cause racine identifiée)</strong>
-          ${s.cause}
-        </div>
-
-        <div style="font-family:var(--font-mono);font-size:12px;color:var(--text-secondary);">
-          Scénario exécuté : <strong style="color:var(--text-primary);">${s.endpoint}</strong>
-        </div>
-
-        <div class="compare-grid">
-          <div>
-            <div class="panel-label" style="color:#f87171;">
-              <span>Comportement signalé (Trace Production)</span>
+        <div class="dossier-sections">
+          <div class="spec-grid">
+            <div class="spec-box">
+              <h3>Règle de gestion de référence (Section 2)</h3>
+              <p>${s.rule}</p>
             </div>
-            <div class="code-panel buggy">${JSON.stringify(s.buggyOutput, null, 2)}</div>
+            <div class="spec-box">
+              <h3>Diagnostic technique (Cause racine en production)</h3>
+              <p>${s.cause}</p>
+            </div>
           </div>
-          <div>
-            <div class="panel-label" style="color:var(--accent);">
-              <span>Résultat de notre module (src/rendezVous.ts)</span>
-              <span>✓ Conforme</span>
+
+          <div class="trace-banner">
+            <span>Entrée testée : <strong>${s.endpoint}</strong></span>
+            <span>Fuseau : <strong>Africa/Porto-Novo (GMT+1)</strong></span>
+          </div>
+
+          <div class="diff-columns">
+            <div class="terminal-box">
+              <div class="terminal-header">
+                <span>Trace observée en production</span>
+                <span class="tag tag-anomaly">Avant correction</span>
+              </div>
+              <div class="terminal-body">${JSON.stringify(s.buggyOutput, null, 2)}</div>
             </div>
-            <div class="code-panel fixed">${JSON.stringify(result, null, 2)}</div>
+
+            <div class="terminal-box">
+              <div class="terminal-header">
+                <span>Sortie du module src/rendezVous.ts</span>
+                <span class="tag tag-ok">Conforme Section 2</span>
+              </div>
+              <div class="terminal-body">${JSON.stringify(result, null, 2)}</div>
+            </div>
           </div>
         </div>
       `;
@@ -1172,9 +1286,6 @@
       renderScenarioDetail();
     };
 
-    // =========================================================================
-    // ONGLET 2 : SIMULATEUR INTERACTIF
-    // =========================================================================
     const getClock = () => document.getElementById('globalClock').value.trim();
 
     const updateConsole = (res) => {
@@ -1182,9 +1293,16 @@
       const box = document.getElementById('liveConsole');
       if (res.codeHttp) {
         badge.textContent = `HTTP ${res.codeHttp}`;
-        badge.className = 'badge ' + (res.succes ? 'badge-compliant' : 'badge-anomaly');
+        badge.className = 'tag ' + (res.succes ? 'tag-ok' : 'tag-anomaly');
       }
       box.textContent = JSON.stringify(res, null, 2);
+    };
+
+    const getStatusTagClass = (statut) => {
+      if (statut === 'confirme') return 'tag-compliant';
+      if (statut === 'honore') return 'tag-ok';
+      if (statut === 'absent') return 'tag-bonus';
+      return 'tag-anomaly';
     };
 
     const renderTable = () => {
@@ -1194,23 +1312,22 @@
       document.getElementById('pageIndicator').textContent = `Page ${pageData.page}/${pageData.totalPages} (${pageData.total} RDV)`;
 
       const tbody = document.getElementById('rdvTableBody');
-      tbody.innerHTML = pageData.rendezVous.map((r) => {
-        const statusClass = `status-${r.statut}`;
-        return `
-          <tr>
-            <td style="font-family:var(--font-mono);font-weight:700;">#${r.id}</td>
-            <td style="font-family:var(--font-mono);">${r.npi}</td>
-            <td>${r.service}</td>
-            <td style="font-family:var(--font-mono);">${r.dateHeure}</td>
-            <td><span class="status-pill ${statusClass}">${r.statut}</span></td>
-            <td style="display:flex;gap:6px;flex-wrap:wrap;">
-              <button class="btn-sm danger" onclick="simCancel(${r.id})">Annuler (Usager)</button>
-              <button class="btn-sm success" onclick="simStatus(${r.id}, 'honore')">Honorer (Agent)</button>
-              <button class="btn-sm warn" onclick="simStatus(${r.id}, 'absent')">Absent (Agent)</button>
-            </td>
-          </tr>
-        `;
-      }).join('');
+      tbody.innerHTML = pageData.rendezVous.map((r) => `
+        <tr>
+          <td class="mono-cell"><strong>#${r.id}</strong></td>
+          <td class="mono-cell">${r.npi}</td>
+          <td>${r.service}</td>
+          <td class="mono-cell">${r.dateHeure}</td>
+          <td><span class="tag ${getStatusTagClass(r.statut)}">${r.statut}</span></td>
+          <td>
+            <div style="display:flex;gap:0.375rem;flex-wrap:wrap;">
+              <button type="button" class="btn-action act-cancel" onclick="simCancel(${r.id})">Annuler (Usager)</button>
+              <button type="button" class="btn-action act-honore" onclick="simStatus(${r.id}, 'honore')">Honorer (Agent)</button>
+              <button type="button" class="btn-action act-absent" onclick="simStatus(${r.id}, 'absent')">Absent (Agent)</button>
+            </div>
+          </td>
+        </tr>
+      `).join('');
     };
 
     window.handleBooking = (e) => {
@@ -1280,17 +1397,15 @@
 
     document.getElementById('globalClock').addEventListener('change', renderTable);
 
-    // Navigation par onglets
-    document.querySelectorAll('.tab-btn').forEach((btn) => {
+    document.querySelectorAll('.mode-tab').forEach((btn) => {
       btn.addEventListener('click', () => {
-        document.querySelectorAll('.tab-btn').forEach((b) => b.classList.remove('active'));
-        document.querySelectorAll('.tab-panel').forEach((p) => p.classList.remove('active'));
+        document.querySelectorAll('.mode-tab').forEach((b) => b.classList.remove('active'));
+        document.querySelectorAll('.view-pane').forEach((p) => p.classList.remove('active'));
         btn.classList.add('active');
         document.getElementById(btn.dataset.tab).classList.add('active');
       });
     });
 
-    // Initialisation
     renderScenarioList();
     renderScenarioDetail();
     renderTable();
