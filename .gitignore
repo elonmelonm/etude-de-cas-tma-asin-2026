@@ -1,0 +1,9 @@
+node_modules/
+dist/
+coverage/
+.env
+.env.*
+*.db
+*.sqlite
+*.sqlite3
+Sujet_etude_de_cas_TMA_Junior.docx
