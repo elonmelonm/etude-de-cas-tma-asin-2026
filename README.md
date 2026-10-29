@@ -51,6 +51,19 @@ for i, q in enumerate([s.strip() for s in open('requetes.sql').read().split(';')
 "
 ```
 
+### Interface de démonstration interactive pour le jury (`demo/index.html`)
+
+Une interface visuelle autonome (fichier unique sans dépendance externe) est fournie dans [`demo/index.html`](demo/index.html) pour permettre au jury de :
+1. **Rejouer en 1 clic les 7 tickets (`TMA-101` à `TMA-107`) et les 4 cas Bonus** en comparant la trace de production et le retour exact du module corrigé.
+2. **Tester interactivement le simulateur Guichet & Usager** (`prendreRendezVous`, `annulerRendezVous`, `changerStatutRendezVous`, `listerRendezVousUsager`) avec contrôle de l'horloge du Bénin (`GMT+1`).
+3. **Visualiser les tableaux de résultats SQL d'impact**.
+
+Pour l'ouvrir directement dans un navigateur :
+```bash
+xdg-open demo/index.html   # Linux
+open demo/index.html       # macOS
+```
+
 ---
 
 ## 2. Architecture du module de règles de gestion (`src/rendezVous.ts`)

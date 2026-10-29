@@ -1,0 +1,1299 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Démonstrateur Interactif — TMA DEP/ASIN 2026 (Prise de rendez-vous au guichet)</title>
+  <style>
+    :root {
+      --bg-primary: #0b0f17;
+      --bg-secondary: #111827;
+      --bg-card: #161f30;
+      --bg-elevated: #1e293b;
+      --border: #283548;
+      --text-primary: #f8fafc;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+      --benin-green: #008751;
+      --benin-yellow: #fcd116;
+      --benin-red: #e8112d;
+      --accent: #10b981;
+      --accent-soft: rgba(16, 185, 129, 0.14);
+      --warning: #f59e0b;
+      --warning-soft: rgba(245, 158, 11, 0.14);
+      --danger: #ef4444;
+      --danger-soft: rgba(239, 68, 68, 0.14);
+      --info: #3b82f6;
+      --info-soft: rgba(59, 130, 246, 0.14);
+      --radius: 10px;
+      --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      --font-mono: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, Menlo, monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-primary);
+      color: var(--text-primary);
+      font-family: var(--font-sans);
+      line-height: 1.5;
+      min-height: 100vh;
+    }
+
+    .benin-bar {
+      height: 4px;
+      background: linear-gradient(90deg, var(--benin-green) 0% 33.3%, var(--benin-yellow) 33.3% 66.6%, var(--benin-red) 66.6% 100%);
+    }
+
+    header {
+      background: var(--bg-secondary);
+      border-bottom: 1px solid var(--border);
+      padding: 18px 28px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .brand-badge {
+      background: var(--accent-soft);
+      color: var(--accent);
+      border: 1px solid rgba(16, 185, 129, 0.35);
+      font-weight: 700;
+      font-size: 12px;
+      letter-spacing: 0.06em;
+      padding: 6px 10px;
+      border-radius: 6px;
+      text-transform: uppercase;
+    }
+
+    .brand h1 {
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+    }
+
+    .brand p {
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+
+    .clock-box {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      padding: 8px 14px;
+      border-radius: var(--radius);
+    }
+
+    .clock-box label {
+      font-size: 12px;
+      color: var(--text-secondary);
+      font-weight: 600;
+    }
+
+    .clock-box input {
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      border: 1px solid var(--border);
+      padding: 5px 10px;
+      border-radius: 6px;
+      font-family: var(--font-mono);
+      font-size: 13px;
+    }
+
+    .btn-reset-clock {
+      background: var(--bg-elevated);
+      color: var(--text-secondary);
+      border: 1px solid var(--border);
+      padding: 5px 10px;
+      border-radius: 6px;
+      font-size: 12px;
+      cursor: pointer;
+    }
+
+    .btn-reset-clock:hover {
+      color: var(--text-primary);
+      border-color: var(--text-secondary);
+    }
+
+    nav.tabs {
+      max-width: 1360px;
+      margin: 20px auto 0;
+      padding: 0 24px;
+      display: flex;
+      gap: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .tab-btn {
+      background: transparent;
+      color: var(--text-secondary);
+      border: none;
+      border-bottom: 2px solid transparent;
+      padding: 12px 18px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .tab-btn:hover {
+      color: var(--text-primary);
+    }
+
+    .tab-btn.active {
+      color: var(--accent);
+      border-bottom-color: var(--accent);
+    }
+
+    main {
+      max-width: 1360px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+
+    .tab-panel {
+      display: none;
+    }
+
+    .tab-panel.active {
+      display: block;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 380px 1fr;
+      gap: 20px;
+      align-items: start;
+    }
+
+    .sim-grid {
+      display: grid;
+      grid-template-columns: 410px 1fr;
+      gap: 20px;
+      align-items: start;
+    }
+
+    @media (max-width: 980px) {
+      .grid-2, .sim-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+    }
+
+    .card-title {
+      font-size: 15px;
+      font-weight: 700;
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .ticket-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .ticket-item {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px 14px;
+      text-align: left;
+      color: var(--text-primary);
+      cursor: pointer;
+      transition: all 0.15s ease;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .ticket-item:hover {
+      border-color: var(--text-muted);
+      background: var(--bg-elevated);
+    }
+
+    .ticket-item.active {
+      border-color: var(--accent);
+      background: rgba(16, 185, 129, 0.08);
+    }
+
+    .ticket-item-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .ticket-code {
+      font-family: var(--font-mono);
+      font-weight: 700;
+      font-size: 13px;
+    }
+
+    .badge {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 999px;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+
+    .badge-anomaly {
+      background: var(--danger-soft);
+      color: #f87171;
+      border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+
+    .badge-compliant {
+      background: var(--info-soft);
+      color: #60a5fa;
+      border: 1px solid rgba(59, 130, 246, 0.3);
+    }
+
+    .badge-bonus {
+      background: var(--warning-soft);
+      color: #fbbf24;
+      border: 1px solid rgba(245, 158, 11, 0.3);
+    }
+
+    . badge-ok {
+      background: var(--accent-soft);
+      color: var(--accent);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+
+    .ticket-desc {
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+
+    .detail-box {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .rule-quote {
+      background: var(--bg-secondary);
+      border-left: 3px solid var(--accent);
+      padding: 12px 16px;
+      border-radius: 0 8px 8px 0;
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+
+    .rule-quote strong {
+      color: var(--text-primary);
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    .compare-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+    @media (max-width: 720px) {
+      .compare-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .code-panel {
+      background: var(--bg-primary);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 14px;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      overflow-x: auto;
+      white-space: pre-wrap;
+    }
+
+    .code-panel.buggy {
+      border-color: rgba(239, 68, 68, 0.4);
+    }
+
+    .code-panel.fixed {
+      border-color: rgba(16, 185, 129, 0.4);
+    }
+
+    .panel-label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .form-group {
+      margin-bottom: 14px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      margin-bottom: 6px;
+    }
+
+    .form-control {
+      width: 100%;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 9px 12px;
+      font-size: 13px;
+      font-family: var(--font-sans);
+    }
+
+    .form-control.mono {
+      font-family: var(--font-mono);
+    }
+
+    .btn {
+      background: var(--accent);
+      color: #042f2e;
+      font-weight: 700;
+      border: none;
+      padding: 10px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 13px;
+      transition: opacity 0.15s;
+    }
+
+    .btn:hover {
+      opacity: 0.92;
+    }
+
+    .btn-sm {
+      padding: 5px 10px;
+      font-size: 11px;
+      font-weight: 600;
+      border-radius: 5px;
+      cursor: pointer;
+      border: 1px solid var(--border);
+      background: var(--bg-elevated);
+      color: var(--text-primary);
+    }
+
+    .btn-sm:hover {
+      border-color: var(--text-secondary);
+    }
+
+    .btn-sm.danger {
+      background: var(--danger-soft);
+      color: #f87171;
+      border-color: rgba(239, 68, 68, 0.35);
+    }
+
+    .btn-sm.success {
+      background: var(--accent-soft);
+      color: #34d399;
+      border-color: rgba(16, 185, 129, 0.35);
+    }
+
+    .btn-sm.warn {
+      background: var(--warning-soft);
+      color: #fbbf24;
+      border-color: rgba(245, 158, 11, 0.35);
+    }
+
+    .quick-presets {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 14px;
+    }
+
+    table.data-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+
+    table.data-table th,
+    table.data-table td {
+      padding: 9px 10px;
+      border-bottom: 1px solid var(--border);
+      text-align: left;
+    }
+
+    table.data-table th {
+      color: var(--text-secondary);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      background: var(--bg-secondary);
+    }
+
+    .status-pill {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 700;
+      font-family: var(--font-mono);
+    }
+
+    .status-confirme {
+      background: var(--info-soft);
+      color: #60a5fa;
+    }
+
+    .status-honore {
+      background: var(--accent-soft);
+      color: #34d399;
+    }
+
+    .status-absent {
+      background: var(--warning-soft);
+      color: #fbbf24;
+    }
+
+    .status-annule {
+      background: var(--danger-soft);
+      color: #f87171;
+    }
+
+    .sql-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 20px;
+    }
+
+    .kpi-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 14px;
+      margin-bottom: 20px;
+    }
+
+    .kpi-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px;
+    }
+
+    .kpi-value {
+      font-size: 26px;
+      font-weight: 800;
+      font-family: var(--font-mono);
+      color: var(--accent);
+    }
+
+    .kpi-label {
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin-top: 4px;
+    }
+  </style>
+</head>
+<body>
+  <div class="benin-bar"></div>
+  <header>
+    <div class="brand">
+      <span class="brand-badge">DEP / ASIN 2026</span>
+      <div>
+        <h1>Prise de rendez-vous au guichet — Démonstrateur TMA</h1>
+        <p>Noyau métier pur (<code>src/rendezVous.ts</code>) • 7 Tickets TMA • Impact SQL • 5 Bonus</p>
+      </div>
+    </div>
+    <div class="clock-box">
+      <label for="globalClock">Horloge Bénin (GMT+1) :</label>
+      <input type="text" id="globalClock" value="2026-11-20T18:00" />
+      <button class="btn-reset-clock" id="resetClockBtn" title="Revenir à la date de l'export SQL">Réinitialiser (20/11 18:00)</button>
+    </div>
+  </header>
+
+  <nav class="tabs">
+    <button class="tab-btn active" data-tab="tab-tickets">1. Rejouer les 7 Tickets &amp; 5 Bonus</button>
+    <button class="tab-btn" data-tab="tab-sim">2. Simulateur Interactif (Usager &amp; Agent)</button>
+    <button class="tab-btn" data-tab="tab-sql">3. Résultats SQL d'Impact (base_rendez_vous.sql)</button>
+  </nav>
+
+  <main>
+    <!-- TAB 1 : REJOUER LES TICKETS & BONUS -->
+    <section id="tab-tickets" class="tab-panel active">
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-title">
+            <span>Sélectionner un scénario</span>
+            <span style="font-size:12px;color:var(--text-secondary)">12 cas</span>
+          </div>
+          <div class="ticket-list" id="scenarioList"></div>
+        </div>
+
+        <div class="card detail-box" id="scenarioDetail"></div>
+      </div>
+    </section>
+
+    <!-- TAB 2 : SIMULATEUR INTERACTIF -->
+    <section id="tab-sim" class="tab-panel">
+      <div class="sim-grid">
+        <div style="display:flex;flex-direction:column;gap:18px;">
+          <div class="card">
+            <div class="card-title">
+              <span>Prendre un rendez-vous (<code>prendreRendezVous</code>)</span>
+            </div>
+            <div class="quick-presets">
+              <button class="btn-sm" onclick="fillPreset('valid')">Créneau valide (Mer 25/11 09:00)</button>
+              <button class="btn-sm danger" onclick="fillPreset('saturday')">Samedi (TMA-101)</button>
+              <button class="btn-sm danger" onclick="fillPreset('full')">Créneau plein 24/11 14:00 (TMA-102)</button>
+              <button class="btn-sm danger" onclick="fillPreset('badnpi')">NPI lettre (TMA-103)</button>
+              <button class="btn-sm danger" onclick="fillPreset('afterhours')">16:00 hors grille (Bonus 2)</button>
+              <button class="btn-sm warn" onclick="fillPreset('already')">2e RDV à venir (TMA-107)</button>
+            </div>
+            <form id="bookingForm" onsubmit="handleBooking(event)">
+              <div class="form-group">
+                <label>NPI de l'usager (exactement 10 chiffres, zéros significatifs)</label>
+                <input type="text" id="inputNpi" class="form-control mono" value="0614253647" />
+              </div>
+              <div class="form-group">
+                <label>Service demandé</label>
+                <select id="inputService" class="form-control">
+                  <option value="PASSEPORT">PASSEPORT</option>
+                  <option value="CNI">CNI</option>
+                  <option value="PERMIS">PERMIS</option>
+                  <option value="VISA">VISA (Service inconnu -> test 400)</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Date et heure souhaitées (format <code>AAAA-MM-JJTHH:MM</code>)</label>
+                <input type="text" id="inputDateHeure" class="form-control mono" value="2026-11-25T09:00" />
+              </div>
+              <button type="submit" class="btn" style="width:100%;">Exécuter prendreRendezVous()</button>
+            </form>
+          </div>
+
+          <div class="card">
+            <div class="card-title">
+              <span>Dernière réponse du module métier</span>
+              <span id="httpStatusBadge" class="badge badge-compliant">Prêt</span>
+            </div>
+            <div class="code-panel" id="liveConsole">Cliquez sur un bouton d'action pour observer le retour exact du module src/rendezVous.ts.</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">
+            <span>Liste paginée &amp; Actions Guichet (<code>listerRendezVousUsager</code>)</span>
+            <div style="display:flex;gap:8px;align-items:center;">
+              <select id="filterNpiSelect" class="form-control mono" style="width:auto;padding:5px 10px;font-size:12px;" onchange="changeFilterNpi()">
+                <option value="ALL">Tous les RDV de démonstration</option>
+                <option value="0203040506" selected>NPI 0203040506 (13 RDV — TMA-106)</option>
+                <option value="0102030405">NPI 0102030405 (RDV #800 — TMA-107)</option>
+                <option value="0614253647">NPI 0614253647 (RDV #742 — TMA-101)</option>
+                <option value="0339205992">NPI 0339205992 (RDV #709 — TMA-104)</option>
+                <option value="0330677555">NPI 0330677555 (RDV #292 — TMA-105)</option>
+              </select>
+              <button class="btn-sm" onclick="prevPage()">◀ Page préc.</button>
+              <span id="pageIndicator" style="font-size:12px;font-family:var(--font-mono);">Page 1/2</span>
+              <button class="btn-sm" onclick="nextPage()">Page suiv. ▶</button>
+            </div>
+          </div>
+          <p style="font-size:12px;color:var(--text-secondary);margin-bottom:12px;">
+            Règle appliquée : <strong>prochain rendez-vous confirmé à venir en tête</strong>, puis tri chronologique décroissant par pages de <strong>10</strong>. Testez aussi <code>annulerRendezVous()</code> (usager) et <code>changerStatutRendezVous()</code> (agent).
+          </p>
+          <div style="overflow-x:auto;">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>NPI</th>
+                  <th>Service</th>
+                  <th>Créneau (dateHeure)</th>
+                  <th>Statut</th>
+                  <th>Actions (Usager / Agent)</th>
+                </tr>
+              </thead>
+              <tbody id="rdvTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 3 : RESULTATS SQL D'IMPACT -->
+    <section id="tab-sql" class="tab-panel">
+      <div class="kpi-row">
+        <div class="kpi-card">
+          <div class="kpi-value">889</div>
+          <div class="kpi-label">Rendez-vous audités dans <code>base_rendez_vous.sql</code></div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-value" style="color:#fbbf24;">5</div>
+          <div class="kpi-label">RDV confirmés à venir un samedi (usagers à prévenir)</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-value" style="color:#f87171;">3</div>
+          <div class="kpi-label">Créneaux en surnombre (&gt; 3 RDV non annulés)</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-value" style="color:#60a5fa;">4</div>
+          <div class="kpi-label">RDV passés de <code>annule</code> à un autre statut</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-value" style="color:#a78bfa;">51</div>
+          <div class="kpi-label">Couples de RDV chevauchants détectés (Bonus 3)</div>
+        </div>
+      </div>
+
+      <div class="sql-grid">
+        <div class="card">
+          <div class="card-title">
+            <span>Requête 1 — Rendez-vous confirmés à venir pris un samedi ou un dimanche (5 usagers à prévenir)</span>
+            <span class="badge badge-anomaly">Priorité : RDV #680 dès demain 21/11 à 08:30</span>
+          </div>
+          <table class="data-table">
+            <thead>
+              <tr><th>ID</th><th>NPI</th><th>Service</th><th>Date et heure</th><th>Jour</th><th>Statut</th><th>Créé le</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><strong>680</strong></td><td><code>0669147625</code></td><td>PASSEPORT</td><td><code>2026-11-21 08:30:00</code></td><td>Samedi</td><td><span class="status-pill status-confirme">confirme</span></td><td>2026-11-02 18:45:57</td></tr>
+              <tr><td><strong>730</strong></td><td><code>0679617916</code></td><td>CNI</td><td><code>2026-11-28 09:00:00</code></td><td>Samedi</td><td><span class="status-pill status-confirme">confirme</span></td><td>2026-11-08 13:45:37</td></tr>
+              <tr><td><strong>834</strong></td><td><code>0610588823</code></td><td>CNI</td><td><code>2026-12-05 10:00:00</code></td><td>Samedi</td><td><span class="status-pill status-confirme">confirme</span></td><td>2026-11-19 07:16:21</td></tr>
+              <tr><td><strong>857</strong></td><td><code>0671987446</code></td><td>PERMIS</td><td><code>2026-12-05 10:00:00</code></td><td>Samedi</td><td><span class="status-pill status-confirme">confirme</span></td><td>2026-11-20 12:38:16</td></tr>
+              <tr><td><strong>874</strong></td><td><code>0648953073</code></td><td>PASSEPORT</td><td><code>2026-12-12 11:00:00</code></td><td>Samedi</td><td><span class="status-pill status-confirme">confirme</span></td><td>2026-11-20 16:39:37</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="card">
+          <div class="card-title">
+            <span>Requête 2 — Créneaux qui comptent plus de 3 rendez-vous non annulés (3 créneaux)</span>
+            <span class="badge badge-bonus">Créneau 2026-11-24 14:00:00 à venir !</span>
+          </div>
+          <table class="data-table">
+            <thead>
+              <tr><th>Créneau</th><th>Nb RDV non annulés</th><th>IDs et NPIs concernés</th><th>État</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><code>2026-10-22 10:30:00</code></td><td><strong>4</strong></td><td><code>#502</code> (0645563824), <code>#511</code> (0651727951), <code>#517</code> (0636435449), <code>#519</code> (0661073846)</td><td>Passé (tous <code>honore</code>)</td></tr>
+              <tr><td><code>2026-11-10 09:00:00</code></td><td><strong>4</strong></td><td><code>#632</code> (0638958971), <code>#644</code> (0671968463), <code>#681</code> (0609394161), <code>#697</code> (0620214467)</td><td>Passé (cf. <strong>TMA-102</strong>)</td></tr>
+              <tr><td><code>2026-11-24 14:00:00</code></td><td><strong>4</strong></td><td><code>#728</code> (0672061877), <code>#750</code> (0650272558), <code>#763</code> (0695270551), <code>#783</code> (0646734692)</td><td><strong>À venir (tous <code>confirme</code>)</strong></td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="card">
+          <div class="card-title">
+            <span>Requête 3 — Rendez-vous passés du statut « annulé » à un autre statut (4 rendez-vous)</span>
+          </div>
+          <table class="data-table">
+            <thead>
+              <tr><th>ID RDV</th><th>NPI</th><th>Service</th><th>Créneau</th><th>Transition</th><th>Modifié le</th><th>Agent</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><strong>208</strong></td><td><code>0384914669</code></td><td>PASSEPORT</td><td><code>2026-10-07 10:00:00</code></td><td><code>annule → honore</code></td><td>2026-10-07 10:20:00</td><td><code>AG-01</code></td></tr>
+              <tr><td><strong>231</strong></td><td><code>0370202195</code></td><td>PASSEPORT</td><td><code>2026-10-15 10:00:00</code></td><td><code>annule → honore</code></td><td>2026-10-15 10:26:00</td><td><code>AG-02</code></td></tr>
+              <tr><td><strong>262</strong></td><td><code>0317656053</code></td><td>PERMIS</td><td><code>2026-10-29 10:00:00</code></td><td><code>annule → absent</code></td><td>2026-10-29 10:21:00</td><td><code>AG-03</code></td></tr>
+              <tr><td><strong>292</strong></td><td><code>0330677555</code></td><td>PASSEPORT</td><td><code>2026-11-12 10:00:00</code></td><td><code>annule → honore</code></td><td>2026-11-12 10:13:00</td><td><code>AG-04</code> (cf. <strong>TMA-105</strong>)</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    // =========================================================================
+    // NOYAU MÉTIER PUR (Miroir exact de src/rendezVous.ts)
+    // =========================================================================
+    const SERVICES_VALIDES = ['PASSEPORT', 'CNI', 'PERMIS'];
+    const STATUTS_CLOTURE_AGENT = ['honore', 'absent'];
+    const CAPACITE_MAX_CRENEAU = 3;
+    const TAILLE_PAGE_DEFAUT = 10;
+    const DELAI_MIN_ANNULATION_HEURES = 24;
+    const HEURE_OUVERTURE_MINUTES = 8 * 60;
+    const HEURE_DERNIER_CRENEAU_MINUTES = 15 * 60 + 30;
+    const DUREE_CRENEAU_MINUTES = 30;
+
+    const ERREURS_METIER = {
+      NPI_INVALIDE: { codeHttp: 400, message: 'Le NPI doit comporter exactement 10 chiffres.' },
+      SERVICE_INCONNU: { codeHttp: 400, message: 'Service inconnu : choisissez PASSEPORT, CNI ou PERMIS.' },
+      DATE_HEURE_ILLISIBLE: { codeHttp: 400, message: 'Date et heure invalides (format attendu : AAAA-MM-JJTHH:MM).' },
+      DATE_PASSEE: { codeHttp: 409, message: 'Impossible de prendre un rendez-vous dans le passé.' },
+      WEEK_END: { codeHttp: 409, message: 'Le centre est fermé le week-end.' },
+      HEURE_HORS_GRILLE: { codeHttp: 409, message: 'Créneau invalide : de 08:00 à 15:30, toutes les 30 minutes.' },
+      RDV_DEJA_A_VENIR: { codeHttp: 409, message: 'Vous avez déjà un rendez-vous à venir.' },
+      CRENEAU_PLEIN: { codeHttp: 409, message: 'Ce créneau est complet.' },
+      ANNULATION_NON_CONFIRME: { codeHttp: 409, message: 'Ce rendez-vous ne peut plus être annulé.' },
+      ANNULATION_TARDIVE: { codeHttp: 409, message: 'Annulation impossible moins de 24 h avant le rendez-vous.' },
+      STATUT_INCONNU: { codeHttp: 400, message: 'Statut invalide : honore ou absent.' },
+      RDV_DEJA_CLOTURE: { codeHttp: 409, message: 'Ce rendez-vous est déjà clôturé.' },
+    };
+
+    const analyserDateHeureBenin = (valeur, modeStrictIso = true) => {
+      if (typeof valeur !== 'string') return null;
+      const texte = valeur.trim();
+      const regex = modeStrictIso
+        ? /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})(?::(\d{2}))?$/
+        : /^(\d{4})-(\d{2})-(\d{2})[T ](\d{2}):(\d{2})(?::(\d{2}))?$/;
+
+      const match = regex.exec(texte);
+      let annee, mois, jour, heure, minute, seconde;
+      if (match) {
+        annee = Number(match[1]);
+        mois = Number(match[2]);
+        jour = Number(match[3]);
+        heure = Number(match[4]);
+        minute = Number(match[5]);
+        seconde = match[6] !== undefined ? Number(match[6]) : 0;
+      } else if (!modeStrictIso) {
+        const matchFr = /^(\d{2})\/(\d{2})\/(\d{4})[T ](\d{2}):(\d{2})(?::(\d{2}))?$/.exec(texte);
+        if (!matchFr) return null;
+        jour = Number(matchFr[1]);
+        mois = Number(matchFr[2]);
+        annee = Number(matchFr[3]);
+        heure = Number(matchFr[4]);
+        minute = Number(matchFr[5]);
+        seconde = matchFr[6] !== undefined ? Number(matchFr[6]) : 0;
+      } else {
+        return null;
+      }
+
+      if (mois < 1 || mois > 12 || jour < 1 || jour > 31 || heure < 0 || heure > 23 || minute < 0 || minute > 59 || seconde < 0 || seconde > 59) {
+        return null;
+      }
+      if (modeStrictIso && seconde !== 0) return null;
+
+      const dateRefUtc = new Date(Date.UTC(annee, mois - 1, jour, heure, minute, seconde));
+      if (dateRefUtc.getUTCFullYear() !== annee || dateRefUtc.getUTCMonth() + 1 !== mois || dateRefUtc.getUTCDate() !== jour) {
+        return null;
+      }
+
+      return {
+        annee, mois, jour, heure, minute, seconde,
+        timestampMs: Date.UTC(annee, mois - 1, jour, heure - 1, minute, seconde),
+        jourSemaine: dateRefUtc.getUTCDay(),
+        isoMinute: `${String(annee).padStart(4, '0')}-${String(mois).padStart(2, '0')}-${String(jour).padStart(2, '0')}T${String(heure).padStart(2, '0')}:${String(minute).padStart(2, '0')}`,
+      };
+    };
+
+    const estNpiValide = (npi) => typeof npi === 'string' && /^\d{10}$/.test(npi);
+    const estServiceValide = (service) => typeof service === 'string' && SERVICES_VALIDES.includes(service);
+
+    const prendreRendezVous = (demande, rendezVousExistants, maintenant) => {
+      if (!estNpiValide(demande.npi)) {
+        return { succes: false, codeHttp: 400, erreur: ERREURS_METIER.NPI_INVALIDE.message };
+      }
+      if (!estServiceValide(demande.service)) {
+        return { succes: false, codeHttp: 400, erreur: ERREURS_METIER.SERVICE_INCONNU.message };
+      }
+      const dateDemandee = analyserDateHeureBenin(demande.dateHeure, true);
+      if (!dateDemandee) {
+        return { succes: false, codeHttp: 400, erreur: ERREURS_METIER.DATE_HEURE_ILLISIBLE.message };
+      }
+      const horloge = analyserDateHeureBenin(maintenant, false);
+      if (!horloge) {
+        return { succes: false, codeHttp: 400, erreur: 'Horloge système invalide.' };
+      }
+      if (dateDemandee.timestampMs <= horloge.timestampMs) {
+        return { succes: false, codeHttp: 409, erreur: ERREURS_METIER.DATE_PASSEE.message };
+      }
+      if (dateDemandee.jourSemaine === 0 || dateDemandee.jourSemaine === 6) {
+        return { succes: false, codeHttp: 409, erreur: ERREURS_METIER.WEEK_END.message };
+      }
+      const minutesDepuisMinuit = dateDemandee.heure * 60 + dateDemandee.minute;
+      if (dateDemandee.minute % DUREE_CRENEAU_MINUTES !== 0 || dateDemandee.seconde !== 0 ||
+          minutesDepuisMinuit < HEURE_OUVERTURE_MINUTES || minutesDepuisMinuit > HEURE_DERNIER_CRENEAU_MINUTES) {
+        return { succes: false, codeHttp: 409, erreur: ERREURS_METIER.HEURE_HORS_GRILLE.message };
+      }
+      const aDejaRendezVousAVenir = rendezVousExistants.some((rdv) => {
+        if (rdv.npi !== demande.npi || rdv.statut !== 'confirme') return false;
+        const d = analyserDateHeureBenin(rdv.dateHeure, false);
+        return d !== null && d.timestampMs > horloge.timestampMs;
+      });
+      if (aDejaRendezVousAVenir) {
+        return { succes: false, codeHttp: 409, erreur: ERREURS_METIER.RDV_DEJA_A_VENIR.message };
+      }
+      const nbActifs = rendezVousExistants.filter((rdv) => {
+        if (rdv.statut === 'annule') return false;
+        const d = analyserDateHeureBenin(rdv.dateHeure, false);
+        return d !== null && d.isoMinute === dateDemandee.isoMinute;
+      }).length;
+      if (nbActifs >= CAPACITE_MAX_CRENEAU) {
+        return { succes: false, codeHttp: 409, erreur: ERREURS_METIER.CRENEAU_PLEIN.message };
+      }
+      return {
+        succes: true,
+        codeHttp: 201,
+        donnees: {
+          id: Math.floor(900 + Math.random() * 99),
+          npi: demande.npi,
+          service: demande.service,
+          dateHeure: dateDemandee.isoMinute,
+          statut: 'confirme',
+          creeLe: horloge.isoMinute,
+        },
+      };
+    };
+
+    const annulerRendezVous = (rendezVous, maintenant) => {
+      if (rendezVous.statut !== 'confirme') {
+        return { succes: false, codeHttp: 409, erreur: ERREURS_METIER.ANNULATION_NON_CONFIRME.message };
+      }
+      const dateRdv = analyserDateHeureBenin(rendezVous.dateHeure, false);
+      const horloge = analyserDateHeureBenin(maintenant, false);
+      if (dateRdv.timestampMs - horloge.timestampMs < DELAI_MIN_ANNULATION_HEURES * 3600 * 1000) {
+        return { succes: false, codeHttp: 409, erreur: ERREURS_METIER.ANNULATION_TARDIVE.message };
+      }
+      return { succes: true, codeHttp: 200, donnees: { ...rendezVous, statut: 'annule' } };
+    };
+
+    const changerStatutRendezVous = (rendezVous, nouveauStatut) => {
+      if (typeof nouveauStatut !== 'string' || !STATUTS_CLOTURE_AGENT.includes(nouveauStatut)) {
+        return { succes: false, codeHttp: 400, erreur: ERREURS_METIER.STATUT_INCONNU.message };
+      }
+      if (rendezVous.statut !== 'confirme') {
+        return { succes: false, codeHttp: 409, erreur: ERREURS_METIER.RDV_DEJA_CLOTURE.message };
+      }
+      return { succes: true, codeHttp: 200, donnees: { ...rendezVous, statut: nouveauStatut } };
+    };
+
+    const listerRendezVousUsager = (rendezVous, maintenant, page = 1, parPage = 10, npi) => {
+      const horloge = analyserDateHeureBenin(maintenant, false);
+      const listeFiltree = npi && npi !== 'ALL' ? rendezVous.filter((r) => r.npi === npi) : [...rendezVous];
+      const avecTs = listeFiltree.map((rdv) => {
+        const parsed = analyserDateHeureBenin(rdv.dateHeure, false);
+        const timestampMs = parsed ? parsed.timestampMs : 0;
+        const estProchainAVenir = rdv.statut === 'confirme' && timestampMs > horloge.timestampMs;
+        return { rdv, timestampMs, estProchainAVenir };
+      });
+      avecTs.sort((a, b) => {
+        if (a.estProchainAVenir !== b.estProchainAVenir) return a.estProchainAVenir ? -1 : 1;
+        if (a.estProchainAVenir && b.estProchainAVenir) return a.timestampMs - b.timestampMs;
+        return b.timestampMs - a.timestampMs;
+      });
+      const tries = avecTs.map((x) => x.rdv);
+      const total = tries.length;
+      const totalPages = Math.max(1, Math.ceil(total / parPage));
+      const p = Math.min(Math.max(1, page), totalPages);
+      const debut = (p - 1) * parPage;
+      return {
+        page: p,
+        parPage,
+        total,
+        totalPages,
+        rendezVous: tries.slice(debut, debut + parPage),
+      };
+    };
+
+    // =========================================================================
+    // DONNÉES DE RÉFÉRENCE EXTRAITES DE base_rendez_vous.sql
+    // =========================================================================
+    const baseRendezVousDemo = [
+      // Les 13 RDV exacts de l'usager 0203040506 (TMA-106)
+      { id: 1, npi: '0203040506', service: 'PASSEPORT', dateHeure: '2026-01-05 08:30:00', statut: 'honore' },
+      { id: 2, npi: '0203040506', service: 'CNI', dateHeure: '2026-02-12 10:00:00', statut: 'honore' },
+      { id: 3, npi: '0203040506', service: 'PERMIS', dateHeure: '2026-03-03 14:30:00', statut: 'absent' },
+      { id: 4, npi: '0203040506', service: 'PASSEPORT', dateHeure: '2026-04-21 09:00:00', statut: 'honore' },
+      { id: 5, npi: '0203040506', service: 'CNI', dateHeure: '2026-05-08 11:30:00', statut: 'honore' },
+      { id: 6, npi: '0203040506', service: 'PERMIS', dateHeure: '2026-05-19 15:00:00', statut: 'absent' },
+      { id: 7, npi: '0203040506', service: 'PASSEPORT', dateHeure: '2026-06-02 08:00:00', statut: 'honore' },
+      { id: 8, npi: '0203040506', service: 'CNI', dateHeure: '2026-06-16 13:30:00', statut: 'honore' },
+      { id: 9, npi: '0203040506', service: 'PERMIS', dateHeure: '2026-07-07 10:30:00', statut: 'honore' },
+      { id: 10, npi: '0203040506', service: 'PASSEPORT', dateHeure: '2026-07-28 09:30:00', statut: 'absent' },
+      { id: 11, npi: '0203040506', service: 'CNI', dateHeure: '2026-08-11 14:00:00', statut: 'honore' },
+      { id: 259, npi: '0203040506', service: 'PERMIS', dateHeure: '2026-09-25 11:00:00', statut: 'honore' },
+      { id: 826, npi: '0203040506', service: 'PASSEPORT', dateHeure: '2026-12-02 08:30:00', statut: 'confirme' },
+      // TMA-101 & Bonus 4
+      { id: 742, npi: '0614253647', service: 'PASSEPORT', dateHeure: '2026-11-14 10:00:00', statut: 'confirme' },
+      // TMA-104
+      { id: 709, npi: '0339205992', service: 'PERMIS', dateHeure: '2026-11-19 10:00:00', statut: 'confirme' },
+      // TMA-105
+      { id: 292, npi: '0330677555', service: 'PASSEPORT', dateHeure: '2026-11-12 10:00:00', statut: 'annule' },
+      // TMA-107
+      { id: 800, npi: '0102030405', service: 'PASSEPORT', dateHeure: '2026-11-26 10:00:00', statut: 'confirme' },
+      // Créneau plein à venir du 24/11/2026 14:00
+      { id: 728, npi: '0672061877', service: 'PERMIS', dateHeure: '2026-11-24 14:00:00', statut: 'confirme' },
+      { id: 750, npi: '0650272558', service: 'PASSEPORT', dateHeure: '2026-11-24 14:00:00', statut: 'confirme' },
+      { id: 763, npi: '0695270551', service: 'PASSEPORT', dateHeure: '2026-11-24 14:00:00', statut: 'confirme' },
+    ];
+
+    // =========================================================================
+    // SCÉNARIOS DES 7 TICKETS TMA + 5 BONUS
+    // =========================================================================
+    const scenarios = [
+      {
+        code: 'TMA-101',
+        type: 'anomaly',
+        badge: 'Anomalie',
+        title: 'Rendez-vous confirmé un samedi (14/11/2026)',
+        rule: '« Le centre reçoit du lundi au vendredi, par créneaux de 30 minutes. » → 409 Le centre est fermé le week-end.',
+        cause: 'En base, les 8 RDV de week-end tombent tous un samedi (0 le dimanche). Le code de production a vérifié jour IN (6, 7) (convention ISO 1..7) sur une fonction renvoyant 0=Lundi..5=Samedi, 6=Dimanche (ex. weekday() en Python), bloquant le dimanche (6) mais laissant passer le samedi (5).',
+        endpoint: 'POST /api/rendez-vous (maintenant = 2026-11-09T23:59)',
+        buggyOutput: { status: 201, body: { id: 742, npi: '0614253647', service: 'PASSEPORT', dateHeure: '14/11/2026 10:00', statut: 'confirme' } },
+        run: () => prendreRendezVous({ npi: '0614253647', service: 'PASSEPORT', dateHeure: '2026-11-14T10:00' }, [], '2026-11-09T23:59'),
+      },
+      {
+        code: 'TMA-102',
+        type: 'anomaly',
+        badge: 'Anomalie',
+        title: '4 usagers acceptés sur le créneau du 10/11/2026 à 09:00',
+        rule: '« Un créneau accueille au plus 3 usagers. Un rendez-vous annulé libère sa place. » → 409 Ce créneau est complet.',
+        cause: 'Les 3 créneaux en surnombre de la base (22/10 10:30, 10/11 09:00, 24/11 14:00) comptent tous exactement 4 RDV (jamais 5) : le code testait nbInscrits > 3 au lieu de nbInscrits >= 3 avant insertion (ou filtrait par service).',
+        endpoint: 'POST /api/rendez-vous (avec RDV #632, #644, #681 déjà confirmés sur 2026-11-10 09:00)',
+        buggyOutput: { status: 201, body: { id: 697, npi: '0620214467', service: 'CNI', dateHeure: '10/11/2026 09:00', statut: 'confirme' } },
+        run: () => prendreRendezVous(
+          { npi: '0620214467', service: 'CNI', dateHeure: '2026-11-10T09:00' },
+          [
+            { id: 632, npi: '0638958971', service: 'PASSEPORT', dateHeure: '2026-11-10 09:00:00', statut: 'confirme' },
+            { id: 644, npi: '0671968463', service: 'CNI', dateHeure: '2026-11-10 09:00:00', statut: 'confirme' },
+            { id: 681, npi: '0609394161', service: 'PERMIS', dateHeure: '2026-11-10 09:00:00', statut: 'confirme' },
+          ],
+          '2026-11-04T23:43'
+        ),
+      },
+      {
+        code: 'TMA-103',
+        type: 'anomaly',
+        badge: 'Anomalie',
+        title: 'Erreur 500 lorsque le NPI contient une lettre ("06142A3647")',
+        rule: '« Un rendez-vous est pris pour un usager, identifié par son NPI, composé d\'exactement 10 chiffres. Une saisie invalide est refusée avec 400, jamais par une erreur interne. »',
+        cause: 'Absence de validation par expression régulière ^\\d{10}$ avant conversion numérique (int(npi)), provoquant une exception non interceptée (ValueError / NumberFormatException -> HTTP 500).',
+        endpoint: 'POST /api/rendez-vous {"npi":"06142A3647","service":"CNI","dateHeure":"2026-11-23T09:00"}',
+        buggyOutput: { status: 500, body: { erreur: 'Erreur interne du serveur' } },
+        run: () => prendreRendezVous({ npi: '06142A3647', service: 'CNI', dateHeure: '2026-11-23T09:00' }, [], '2026-11-20T18:00'),
+      },
+      {
+        code: 'TMA-104',
+        type: 'anomaly',
+        badge: 'Anomalie',
+        title: 'Annulation refusée 40 h avant le rendez-vous (RDV #709)',
+        rule: '« L\'usager peut annuler son rendez-vous jusqu\'à 24 heures avant l\'heure prévue. »',
+        cause: 'Le 17/11 à 18:00, le RDV #709 du 19/11 à 10:00 est à 40 h d\'écart (1 jour + 16 h). Le code a utilisé (date_rdv - maintenant).seconds / 3600 (qui vaut 16 h < 24 h en ignorant .days !) ou comparé uniquement les heures du jour (10 - 18 = -8 < 24).',
+        endpoint: 'POST /api/rendez-vous/709/annulation (maintenant = 2026-11-17T18:00)',
+        buggyOutput: { status: 409, body: { erreur: 'Annulation impossible moins de 24 h avant le rendez-vous.' } },
+        run: () => annulerRendezVous({ id: 709, npi: '0339205992', service: 'PERMIS', dateHeure: '2026-11-19 10:00:00', statut: 'confirme' }, '2026-11-17T18:00'),
+      },
+      {
+        code: 'TMA-105',
+        type: 'anomaly',
+        badge: 'Anomalie',
+        title: 'Un rendez-vous annulé (#292) passe au statut "honore"',
+        rule: '« Un rendez-vous confirmé devient honoré, absent ou annulé. Ces trois statuts sont définitifs. » → 409 Ce rendez-vous est déjà clôturé.',
+        cause: 'L\'endpoint PATCH /api/rendez-vous/:id/statut ne vérifiait pas que le statut actuel était "confirme" avant d\'appliquer "honore" ou "absent" (4 cas en base : #208, #231, #262, #292).',
+        endpoint: 'PATCH /api/rendez-vous/292/statut {"statut":"honore"}',
+        buggyOutput: { status: 200, body: { id: 292, npi: '0330677555', service: 'PASSEPORT', statut: 'honore' } },
+        run: () => changerStatutRendezVous({ id: 292, npi: '0330677555', service: 'PASSEPORT', dateHeure: '2026-11-12 10:00:00', statut: 'annule' }, 'honore'),
+      },
+      {
+        code: 'TMA-106',
+        type: 'anomaly',
+        badge: 'Anomalie',
+        title: 'RDV du 2 décembre (#826) absent de la 1re page de "Mes rendez-vous"',
+        rule: '« Les rendez-vous d\'un usager sont listés du plus récent au plus ancien, le prochain rendez-vous en tête, par pages de 10. »',
+        cause: '1) Tri alphabétique décroissant sur la chaîne formatée "JJ/MM/AAAA HH:MM" ("28/07" > "25/09" > ... > "02/12/2026" relégué 12e/13 en page 2) sans mettre le prochain RDV en tête. 2) Erreur off-by-one ne renvoyant que 9 dates sur la page 1.',
+        endpoint: 'GET /api/usagers/0203040506/rendez-vous?page=1',
+        buggyOutput: {
+          page: 1, parPage: 10, total: 13, nbRenvoyes: 9,
+          dates: ['28/07/2026 09:30', '25/09/2026 11:00', '21/04/2026 09:00', '19/05/2026 15:00', '16/06/2026 13:30', '12/02/2026 10:00', '11/08/2026 14:00', '08/05/2026 11:30', '07/07/2026 10:30'],
+        },
+        run: () => {
+          const res = listerRendezVousUsager(baseRendezVousDemo, '2026-11-20T18:00', 1, 10, '0203040506');
+          return {
+            page: res.page,
+            parPage: res.parPage,
+            total: res.total,
+            nbRenvoyes: res.rendezVous.length,
+            idsTries: res.rendezVous.map((r) => `#${r.id} (${r.dateHeure} - ${r.statut})`),
+          };
+        },
+      },
+      {
+        code: 'TMA-107',
+        type: 'compliant',
+        badge: 'Conforme (Pas un bug)',
+        title: 'Refus d\'un RDV PERMIS alors qu\'un RDV PASSEPORT (#800) est déjà à venir',
+        rule: '« Un usager ne peut avoir qu\'un seul rendez-vous à venir, tous services confondus. » → 409 Vous avez déjà un rendez-vous à venir.',
+        cause: 'Comportement 100 % conforme aux spécifications : l\'usager 0102030405 possède déjà le RDV #800 (PASSEPORT) prévu le 26/11/2026 à 10:00.',
+        endpoint: 'POST /api/rendez-vous {"npi":"0102030405","service":"PERMIS","dateHeure":"2026-11-27T09:00"}',
+        buggyOutput: { status: 409, body: { erreur: 'Vous avez déjà un rendez-vous à venir.' } },
+        run: () => prendreRendezVous(
+          { npi: '0102030405', service: 'PERMIS', dateHeure: '2026-11-27T09:00' },
+          [{ id: 800, npi: '0102030405', service: 'PASSEPORT', dateHeure: '2026-11-26 10:00:00', statut: 'confirme' }],
+          '2026-11-20T18:00'
+        ),
+      },
+      {
+        code: 'BONUS-1',
+        type: 'bonus',
+        badge: 'Bonus 1',
+        title: 'NPI de 11 et 12 chiffres enregistrés en base (IDs #459 et #642)',
+        rule: '« L\'usager est identifié par son NPI, composé d\'exactement 10 chiffres. »',
+        cause: 'En base : RDV #459 (NPI "01234567890", 11 chiffres) et RDV #642 (NPI "061425364711", 12 chiffres). Regex non ancrée /\\d{10}/ ou condition length >= 10.',
+        endpoint: 'POST /api/rendez-vous {"npi":"061425364711","service":"PERMIS","dateHeure":"2026-11-25T14:00"}',
+        buggyOutput: { status: 201, body: { id: 642, npi: '061425364711', service: 'PERMIS', statut: 'confirme' } },
+        run: () => prendreRendezVous({ npi: '061425364711', service: 'PERMIS', dateHeure: '2026-11-25T14:00' }, [], '2026-11-20T18:00'),
+      },
+      {
+        code: 'BONUS-2',
+        type: 'bonus',
+        badge: 'Bonus 2',
+        title: 'Créneaux à 16:00 et 16:30 après la fermeture (IDs #490, #698 et #842 à venir)',
+        rule: '« Le premier créneau commence à 8 h 00, le dernier à 15 h 30. » → 409 Créneau invalide : de 08:00 à 15:30, toutes les 30 minutes.',
+        cause: 'En base : #490 (16:00), #698 (16:30) et #842 (2026-12-08 16:00:00, confirmé à venir !). Le code testait 8 <= heure <= 16 au lieu de 08:00 <= heureMinute <= 15:30.',
+        endpoint: 'POST /api/rendez-vous {"npi":"0387129160","service":"PASSEPORT","dateHeure":"2026-12-08T16:00"}',
+        buggyOutput: { status: 201, body: { id: 842, npi: '0387129160', service: 'PASSEPORT', dateHeure: '2026-12-08 16:00:00', statut: 'confirme' } },
+        run: () => prendreRendezVous({ npi: '0387129160', service: 'PASSEPORT', dateHeure: '2026-12-08T16:00' }, [], '2026-11-19T12:29'),
+      },
+      {
+        code: 'BONUS-3',
+        type: 'bonus',
+        badge: 'Bonus 3',
+        title: '51 couples de RDV chevauchants en base (ex. #751 et #816 sur NPI 0902861159)',
+        rule: '« Un usager ne peut avoir qu\'un seul rendez-vous à venir, tous services confondus. »',
+        cause: '51 couples en base où r1 était encore "confirme" à la date de création de r2 (ex. NPI 0902861159 ayant #751 pour le 01/12/2026 qui réserve #816 le 17/11 ; ou NPI 0536455681 avec #43 et #99 sur le même créneau 2026-09-01 09:30).',
+        endpoint: 'POST /api/rendez-vous (NPI 0902861159 ayant déjà #751 prévu le 01/12/2026)',
+        buggyOutput: { status: 201, body: { id: 816, npi: '0902861159', service: 'PASSEPORT', dateHeure: '2026-11-20 11:30:00', statut: 'confirme' } },
+        run: () => prendreRendezVous(
+          { npi: '0902861159', service: 'PASSEPORT', dateHeure: '2026-11-20T11:30' },
+          [{ id: 751, npi: '0902861159', service: 'PASSEPORT', dateHeure: '2026-12-01 08:00:00', statut: 'confirme' }],
+          '2026-11-17T19:29'
+        ),
+      },
+      {
+        code: 'BONUS-4',
+        type: 'bonus',
+        badge: 'Bonus 4',
+        title: 'RDV de samedis passés (#475, #715, #742) restés bloqués au statut "confirme"',
+        rule: 'Un RDV passé resté au statut "confirme" (faute d\'agent le samedi) ne doit pas bloquer l\'usager à vie.',
+        cause: 'Les RDV #475 (31/10), #715 (14/11) et #742 (14/11, TMA-101) sont dans le passé mais toujours "confirme". Notre module vérifie statut === "confirme" && dateRdv > maintenant.',
+        endpoint: 'POST /api/rendez-vous (l\'usager de TMA-101 reprend RDV le mercredi 25/11)',
+        buggyOutput: { status: 409, body: { erreur: 'Bloqué à tort si on vérifie seulement statut === "confirme" sans date > maintenant' } },
+        run: () => prendreRendezVous(
+          { npi: '0614253647', service: 'PASSEPORT', dateHeure: '2026-11-25T10:00' },
+          [{ id: 742, npi: '0614253647', service: 'PASSEPORT', dateHeure: '2026-11-14 10:00:00', statut: 'confirme' }],
+          '2026-11-20T18:00'
+        ),
+      },
+    ];
+
+    let activeScenarioIndex = 0;
+    let currentPage = 1;
+
+    const renderScenarioList = () => {
+      const container = document.getElementById('scenarioList');
+      container.innerHTML = scenarios.map((s, idx) => {
+        const badgeClass = s.type === 'anomaly' ? 'badge-anomaly' : s.type === 'compliant' ? 'badge-compliant' : 'badge-bonus';
+        return `
+          <button class="ticket-item ${idx === activeScenarioIndex ? 'active' : ''}" onclick="selectScenario(${idx})">
+            <div class="ticket-item-header">
+              <span class="ticket-code">${s.code}</span>
+              <span class="badge ${badgeClass}">${s.badge}</span>
+            </div>
+            <div class="ticket-desc">${s.title}</div>
+          </button>
+        `;
+      }).join('');
+    };
+
+    const renderScenarioDetail = () => {
+      const s = scenarios[activeScenarioIndex];
+      const result = s.run();
+      const badgeClass = s.type === 'anomaly' ? 'badge-anomaly' : s.type === 'compliant' ? 'badge-compliant' : 'badge-bonus';
+
+      document.getElementById('scenarioDetail').innerHTML = `
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
+          <h2 style="font-size:18px;">${s.code} — ${s.title}</h2>
+          <span class="badge ${badgeClass}">${s.badge}</span>
+        </div>
+
+        <div class="rule-quote">
+          <strong>Règle de gestion de référence (Section 2)</strong>
+          ${s.rule}
+        </div>
+
+        <div class="rule-quote" style="border-left-color:var(--warning);">
+          <strong>Diagnostic technique (Cause racine identifiée)</strong>
+          ${s.cause}
+        </div>
+
+        <div style="font-family:var(--font-mono);font-size:12px;color:var(--text-secondary);">
+          Scénario exécuté : <strong style="color:var(--text-primary);">${s.endpoint}</strong>
+        </div>
+
+        <div class="compare-grid">
+          <div>
+            <div class="panel-label" style="color:#f87171;">
+              <span>Comportement signalé (Trace Production)</span>
+            </div>
+            <div class="code-panel buggy">${JSON.stringify(s.buggyOutput, null, 2)}</div>
+          </div>
+          <div>
+            <div class="panel-label" style="color:var(--accent);">
+              <span>Résultat de notre module (src/rendezVous.ts)</span>
+              <span>✓ Conforme</span>
+            </div>
+            <div class="code-panel fixed">${JSON.stringify(result, null, 2)}</div>
+          </div>
+        </div>
+      `;
+    };
+
+    window.selectScenario = (idx) => {
+      activeScenarioIndex = idx;
+      renderScenarioList();
+      renderScenarioDetail();
+    };
+
+    // =========================================================================
+    // ONGLET 2 : SIMULATEUR INTERACTIF
+    // =========================================================================
+    const getClock = () => document.getElementById('globalClock').value.trim();
+
+    const updateConsole = (res) => {
+      const badge = document.getElementById('httpStatusBadge');
+      const box = document.getElementById('liveConsole');
+      if (res.codeHttp) {
+        badge.textContent = `HTTP ${res.codeHttp}`;
+        badge.className = 'badge ' + (res.succes ? 'badge-compliant' : 'badge-anomaly');
+      }
+      box.textContent = JSON.stringify(res, null, 2);
+    };
+
+    const renderTable = () => {
+      const npi = document.getElementById('filterNpiSelect').value;
+      const pageData = listerRendezVousUsager(baseRendezVousDemo, getClock(), currentPage, 10, npi);
+      currentPage = pageData.page;
+      document.getElementById('pageIndicator').textContent = `Page ${pageData.page}/${pageData.totalPages} (${pageData.total} RDV)`;
+
+      const tbody = document.getElementById('rdvTableBody');
+      tbody.innerHTML = pageData.rendezVous.map((r) => {
+        const statusClass = `status-${r.statut}`;
+        return `
+          <tr>
+            <td style="font-family:var(--font-mono);font-weight:700;">#${r.id}</td>
+            <td style="font-family:var(--font-mono);">${r.npi}</td>
+            <td>${r.service}</td>
+            <td style="font-family:var(--font-mono);">${r.dateHeure}</td>
+            <td><span class="status-pill ${statusClass}">${r.statut}</span></td>
+            <td style="display:flex;gap:6px;flex-wrap:wrap;">
+              <button class="btn-sm danger" onclick="simCancel(${r.id})">Annuler (Usager)</button>
+              <button class="btn-sm success" onclick="simStatus(${r.id}, 'honore')">Honorer (Agent)</button>
+              <button class="btn-sm warn" onclick="simStatus(${r.id}, 'absent')">Absent (Agent)</button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    };
+
+    window.handleBooking = (e) => {
+      e.preventDefault();
+      const demande = {
+        npi: document.getElementById('inputNpi').value,
+        service: document.getElementById('inputService').value,
+        dateHeure: document.getElementById('inputDateHeure').value,
+      };
+      const res = prendreRendezVous(demande, baseRendezVousDemo, getClock());
+      updateConsole(res);
+      if (res.succes) {
+        baseRendezVousDemo.push(res.donnees);
+        renderTable();
+      }
+    };
+
+    window.simCancel = (id) => {
+      const idx = baseRendezVousDemo.findIndex((r) => r.id === id);
+      if (idx === -1) return;
+      const res = annulerRendezVous(baseRendezVousDemo[idx], getClock());
+      updateConsole(res);
+      if (res.succes) {
+        baseRendezVousDemo[idx] = res.donnees;
+        renderTable();
+      }
+    };
+
+    window.simStatus = (id, statut) => {
+      const idx = baseRendezVousDemo.findIndex((r) => r.id === id);
+      if (idx === -1) return;
+      const res = changerStatutRendezVous(baseRendezVousDemo[idx], statut);
+      updateConsole(res);
+      if (res.succes) {
+        baseRendezVousDemo[idx] = res.donnees;
+        renderTable();
+      }
+    };
+
+    window.fillPreset = (preset) => {
+      const npi = document.getElementById('inputNpi');
+      const srv = document.getElementById('inputService');
+      const dt = document.getElementById('inputDateHeure');
+      if (preset === 'valid') {
+        npi.value = '0987654321'; srv.value = 'PASSEPORT'; dt.value = '2026-11-25T09:00';
+      } else if (preset === 'saturday') {
+        npi.value = '0987654321'; srv.value = 'PASSEPORT'; dt.value = '2026-11-21T10:00';
+      } else if (preset === 'full') {
+        npi.value = '0987654321'; srv.value = 'CNI'; dt.value = '2026-11-24T14:00';
+      } else if (preset === 'badnpi') {
+        npi.value = '06142A3647'; srv.value = 'CNI'; dt.value = '2026-11-23T09:00';
+      } else if (preset === 'afterhours') {
+        npi.value = '0987654321'; srv.value = 'PASSEPORT'; dt.value = '2026-12-08T16:00';
+      } else if (preset === 'already') {
+        npi.value = '0102030405'; srv.value = 'PERMIS'; dt.value = '2026-11-27T09:00';
+      }
+    };
+
+    window.changeFilterNpi = () => { currentPage = 1; renderTable(); };
+    window.prevPage = () => { if (currentPage > 1) { currentPage--; renderTable(); } };
+    window.nextPage = () => { currentPage++; renderTable(); };
+
+    document.getElementById('resetClockBtn').addEventListener('click', () => {
+      document.getElementById('globalClock').value = '2026-11-20T18:00';
+      renderTable();
+    });
+
+    document.getElementById('globalClock').addEventListener('change', renderTable);
+
+    // Navigation par onglets
+    document.querySelectorAll('.tab-btn').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab-btn').forEach((b) => b.classList.remove('active'));
+        document.querySelectorAll('.tab-panel').forEach((p) => p.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById(btn.dataset.tab).classList.add('active');
+      });
+    });
+
+    // Initialisation
+    renderScenarioList();
+    renderScenarioDetail();
+    renderTable();
+  </script>
+</body>
+</html>
